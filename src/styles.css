@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+
+.leaflet-div-icon {
+  background: none !important;
+  border: none !important;
+}
