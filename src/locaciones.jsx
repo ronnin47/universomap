@@ -74,6 +74,7 @@ export const locaciones = [
       coords: [15, 20],
       tipo: "escuela",
       tamano: 15,
+      imagenMapaMundi:"https://media.istockphoto.com/id/2150670328/vector/medieval-map-middle-ages-kingdom-map-for-board-game-hand-drawn-vector.jpg?s=612x612&w=is&k=20&c=uCSCjLoniM9sgh4mSZN0qSxJzKtUtJVNtObrKyTmpkE=",
       descripcion: "Entrenamiento de magos y estudiosos.",
       icono: "🏫"
     },
@@ -83,6 +84,7 @@ export const locaciones = [
       coords: [25, 10],
       tipo: "lago",
       tamano: 15,
+      imagenMapaMundi:"https://media.istockphoto.com/id/2150670328/vector/medieval-map-middle-ages-kingdom-map-for-board-game-hand-drawn-vector.jpg?s=612x612&w=is&k=20&c=uCSCjLoniM9sgh4mSZN0qSxJzKtUtJVNtObrKyTmpkE=",
       descripcion: "Lago místico flotando en el aire.",
       icono: "🌊"
     },
@@ -91,6 +93,7 @@ export const locaciones = [
       nombre: "Mirador Estelar",
       coords: [5, 30],
       tipo: "torre",
+      imagenMapaMundi:"https://i.pinimg.com/236x/22/72/98/22729830ebc4be6ac7283c347d44368a.jpg",
       tamano: 15,
       descripcion: "Observatorio de estrellas.",
       icono: "🗼",
@@ -101,7 +104,7 @@ export const locaciones = [
           coords: [378, 171.03330783938816],
           tipo: "armeria",
           tamano: 20,
-          descripcion: ""
+          descripcion: "estamos dentro de la descripcion del mirador estellar ahora"
         }
       ]
     }

@@ -72,21 +72,59 @@ const loc = [
       { id: 402, nombre: "Plaza del Arte", coords: [10, 15], tipo: "plaza",tamano: 15, descripcion: "Lugar de exposiciones culturales.", icono: "🎨" },
     ]
   },
-  { 
-    id: 5, 
-    nombre: "Pushan", 
-    coords: [250, 350], 
-    tipo: "mundo", 
-    tamano: 70, 
-    descripcion: "Isla flotante hogar de los sabios del cielo.", 
-    icono: "🌍",
-         imagenMapaMundi:"https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
-    locaciones: [
-      { id: 501, nombre: "Academia de Hechicería", coords: [15, 20], tipo: "escuela",tamano: 15, descripcion: "Entrenamiento de magos y estudiosos.", icono: "🏫" },
-      { id: 502, nombre: "Lago de las Nubes", coords: [25, 10], tipo: "lago",tamano: 15, descripcion: "Lago místico flotando en el aire.", icono: "🌊" },
-      { id: 503, nombre: "Mirador Estelar", coords: [5, 30], tipo: "torre",tamano: 15, descripcion: "Observatorio de estrellas.", icono: "🗼" },
-    ]
-  },
+   {
+  id: 5,
+  nombre: "Pushan",
+  coords: [250, 350],
+  tipo: "mundo",
+  tamano: 70,
+  descripcion: "Isla flotante hogar de los sabios del cielo.",
+  icono: "🌍",
+  imagenMapaMundi:
+    "https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
+  locaciones: [
+    {
+      id: 501,
+      nombre: "Academia de Hechicería",
+      coords: [15, 20],
+      tipo: "escuela",
+      tamano: 15,
+      imagenMapaMundi:"https://i.pinimg.com/originals/fb/7b/3d/fb7b3de481cff29dd673bd2fe1eea144.jpg",
+      descripcion: "Entrenamiento de magos y estudiosos.",
+      icono: "🏫"
+    },
+    {
+      id: 502,
+      nombre: "Lago de las Nubes",
+      coords: [25, 10],
+      tipo: "lago",
+      tamano: 15,
+      imagenMapaMundi:"https://media.istockphoto.com/id/2150670328/vector/medieval-map-middle-ages-kingdom-map-for-board-game-hand-drawn-vector.jpg?s=612x612&w=is&k=20&c=uCSCjLoniM9sgh4mSZN0qSxJzKtUtJVNtObrKyTmpkE=",
+      descripcion: "Lago místico flotando en el aire.",
+      icono: "🌊"
+    },
+    {
+      id: 503,
+      nombre: "Mirador Estelar",
+      coords: [5, 30],
+      tipo: "torre",
+      imagenMapaMundi:"https://i.pinimg.com/236x/22/72/98/22729830ebc4be6ac7283c347d44368a.jpg",
+      tamano: 15,
+      descripcion: "Observatorio de estrellas.",
+      icono: "🗼",
+      sublocaciones: [
+        {
+          id: 1758054727997,
+          nombre: "Kim",
+          coords: [378, 171.03330783938816],
+          tipo: "armeria",
+          tamano: 20,
+          descripcion: "estamos dentro de la descripcion del mirador estellar ahora"
+        }
+      ]
+    }
+  ]
+},
   { 
     id: 6, 
     nombre: "Zen Zen", 
@@ -95,10 +133,27 @@ const loc = [
     tamano: 10, 
     descripcion: "Puerto principal de llegada de naves intercontinentales.", 
     icono: "🌍",
-         imagenMapaMundi:"https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
+    imagenMapaMundi:"https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
     locaciones: [
-      { id: 601, nombre: "Puerto Zen", coords: [2, 3], tipo: "puerto",tamano: 15, descripcion: "Atracaderos de naves.", icono: "⚓" },
-      { id: 602, nombre: "Distrito Comercial", coords: [5, 5], tipo: "mercado",tamano: 15, descripcion: "Centro de comercio y trueque.", icono: "🛒" },
+      { 
+        id: 601, 
+        nombre: "Puerto Zen", 
+        coords: [2, 3], 
+        tipo: "puerto",
+        tamano: 15, 
+        descripcion: "Atracaderos de naves.", 
+        icono: "⚓",
+        imagenMapaMundi:"https://thumbs.dreamstime.com/b/un-mapa-de-batalla-mazmorras-%C3%A9picas-para-el-nivel-fantas%C3%ADa-desplazamiento-la-interfaz-usuario-juego-m%C3%B3vil-realista-desplazar-295464115.jpg"
+      },
+      { 
+        id: 602, 
+        nombre: "Distrito Comercial", 
+        coords: [5, 5], tipo: "mercado",
+        tamano: 15, 
+        descripcion: "Centro de comercio y trueque.", 
+        icono: "🛒",
+        imagenMapaMundi:"https://i.pinimg.com/236x/6a/d3/0b/6ad30bde9315807a8f2a1bffe1ef8572.jpg",
+        },
     ]
   },
   { 

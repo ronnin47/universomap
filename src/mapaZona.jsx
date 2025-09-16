@@ -28,9 +28,10 @@ const iconosBase = {
   luna: "🌙",
   nidoDragon: "🐉",
   tierraNubando: "☁️",
-  hereria: "🔨", // parece que repetiste herreria/hereria
+  hereria: "🔨",
   sol: "☀️",
 };
+
 // 🔹 Componente que escala los iconos según el zoom
 function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, zonaId }) {
   const map = useMapEvent("zoom", () => {
@@ -116,17 +117,21 @@ function RightClickMenu({ abrirModal }) {
 }
 
 export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
-  const { id } = useParams(); // id de la locación (ej: ciudad)
+  const { id } = useParams();
   let zona = null;
+  let imagenMapa = null;
 
-  // Buscamos dentro de todas las locaciones globales
+  // Buscamos la locación dentro de todas las locaciones globales
   for (const mundo of locaciones) {
     const encontrada = mundo.locaciones.find((l) => l.id === parseInt(id));
     if (encontrada) {
       zona = encontrada;
+      imagenMapa = encontrada.imagenMapaMundi || mundo.imagenMapaMundi || null;
       break;
     }
   }
+
+  console.log("locaciones de Mapa zona: ",locaciones);
 
   if (!zona) return <div>Sitio no encontrado</div>;
 
@@ -159,10 +164,8 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
       tamano: 20,
     };
 
-    // 1️⃣ Local
     setSublocaciones([...sublocaciones, nuevaLocacion]);
 
-    // 2️⃣ Global
     setLocaciones((prev) =>
       prev.map((m) => ({
         ...m,
@@ -172,11 +175,10 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
       }))
     );
 
-    // 3️⃣ Posiciones
     setPosiciones((prev) => ({ ...prev, [nuevoId]: posicionClick }));
     setModalVisible(false);
   };
- console.log("",locaciones)
+
   return (
     <div className="p-4 bg-gradient-to-b from-green-200 to-green-500 h-screen flex flex-col">
       <div className="mb-4">
@@ -193,7 +195,7 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
         >
-          <ImageOverlay url={zona.imagenMapaMundi || ""} bounds={bounds} />
+          <ImageOverlay url={imagenMapa || ""} bounds={bounds} opacity={0.8} />
 
           <EscalarIconos
             locaciones={sublocaciones}
@@ -228,7 +230,9 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
               onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
             >
               {Object.keys(iconosBase).map((tipo) => (
-                <option key={tipo} value={tipo}>{tipo}</option>
+                <option key={tipo} value={tipo}>
+                  {tipo}
+                </option>
               ))}
             </select>
 
