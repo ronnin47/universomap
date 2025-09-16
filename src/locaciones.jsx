@@ -57,21 +57,56 @@ export const locaciones = [
       { id: 402, nombre: "Plaza del Arte", coords: [10, 15], tipo: "plaza",tamano: 15, descripcion: "Lugar de exposiciones culturales.", icono: "🎨" },
     ]
   },
-  { 
-    id: 5, 
-    nombre: "Pushan", 
-    coords: [250, 350], 
-    tipo: "mundo", 
-    tamano: 70, 
-    descripcion: "Isla flotante hogar de los sabios del cielo.", 
-    icono: "🌍",
-         imagenMapaMundi:"https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
-    locaciones: [
-      { id: 501, nombre: "Academia de Hechicería", coords: [15, 20], tipo: "escuela",tamano: 15, descripcion: "Entrenamiento de magos y estudiosos.", icono: "🏫" },
-      { id: 502, nombre: "Lago de las Nubes", coords: [25, 10], tipo: "lago",tamano: 15, descripcion: "Lago místico flotando en el aire.", icono: "🌊" },
-      { id: 503, nombre: "Mirador Estelar", coords: [5, 30], tipo: "torre",tamano: 15, descripcion: "Observatorio de estrellas.", icono: "🗼" },
-    ]
-  },
+  {
+  id: 5,
+  nombre: "Pushan",
+  coords: [250, 350],
+  tipo: "mundo",
+  tamano: 70,
+  descripcion: "Isla flotante hogar de los sabios del cielo.",
+  icono: "🌍",
+  imagenMapaMundi:
+    "https://media.istockphoto.com/id/1448525856/es/vector/mapa-del-mundo.jpg?s=612x612&w=0&k=20&c=BKXm57ec9wXwWtA_Yq8bIkkt40bXvblo4-4FeuNNRSo=",
+  locaciones: [
+    {
+      id: 501,
+      nombre: "Academia de Hechicería",
+      coords: [15, 20],
+      tipo: "escuela",
+      tamano: 15,
+      descripcion: "Entrenamiento de magos y estudiosos.",
+      icono: "🏫"
+    },
+    {
+      id: 502,
+      nombre: "Lago de las Nubes",
+      coords: [25, 10],
+      tipo: "lago",
+      tamano: 15,
+      descripcion: "Lago místico flotando en el aire.",
+      icono: "🌊"
+    },
+    {
+      id: 503,
+      nombre: "Mirador Estelar",
+      coords: [5, 30],
+      tipo: "torre",
+      tamano: 15,
+      descripcion: "Observatorio de estrellas.",
+      icono: "🗼",
+      sublocaciones: [
+        {
+          id: 1758054727997,
+          nombre: "Kim",
+          coords: [378, 171.03330783938816],
+          tipo: "armeria",
+          tamano: 20,
+          descripcion: ""
+        }
+      ]
+    }
+  ]
+},
   { 
     id: 6, 
     nombre: "Zen Zen", 

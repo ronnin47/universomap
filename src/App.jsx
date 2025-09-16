@@ -8,7 +8,7 @@ import { Home } from "./home";
 import { Foot } from "./foot";
 import { MapaUniverso } from "./mapaUniverso";
 import { MapaMundo } from "./mapaMundo";
-
+import { MapaZona } from "./mapaZona";
 
 
 export const App=()=> {
@@ -179,6 +179,7 @@ const usuario="narrador"
             <Route path="/pagina2" element={<Pagina2 />} />
              <Route path="/mapaUniverso" element={<MapaUniverso usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
               <Route path="/mapaMundo/:id" element={<MapaMundo usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
+              <Route path="/mapaZona/:id" element={<MapaZona usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
           </Routes>
         
         </main>

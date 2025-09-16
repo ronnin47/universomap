@@ -1,17 +1,17 @@
-// MapaMundo.jsx
-import { useParams, useNavigate } from "react-router-dom";
+// MapaZona.jsx
+import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { MapContainer, ImageOverlay, Marker, Popup, useMapEvent } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// 🔹 Límites del mapa
+// Definimos los límites del mapa
 const bounds = [
   [0, 0],
   [800, 1000],
 ];
 
-// 🔹 Iconos para tipos de locaciones
+// Iconos según tipo de locación
 const iconosBase = {
   mundo: "🌍",
   ciudad: "🏛️",
@@ -28,12 +28,11 @@ const iconosBase = {
   luna: "🌙",
   nidoDragon: "🐉",
   tierraNubando: "☁️",
-  hereria: "🔨",
+  hereria: "🔨", // parece que repetiste herreria/hereria
   sol: "☀️",
 };
-
-// 🔹 Escala los íconos según zoom
-function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal }) {
+// 🔹 Componente que escala los iconos según el zoom
+function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, zonaId }) {
   const map = useMapEvent("zoom", () => {
     const zoom = map.getZoom();
     const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
@@ -54,8 +53,6 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
     });
   });
 
-  const navigate = useNavigate();
-
   return locaciones.map((loc) => {
     const iconoInicial = new L.DivIcon({
       html: `<span style="font-size:${loc.tamano}px">${iconosBase[loc.tipo] || "❓"}</span>`,
@@ -72,22 +69,30 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
           dragend: (e) => {
             if (usuario === "narrador") {
               const { lat, lng } = e.target.getLatLng();
+
+              // Actualizamos posiciones locales
               setPosiciones((prev) => ({
                 ...prev,
                 [loc.id]: [lat, lng],
               }));
+
+              // Actualizamos coordenadas en el estado global
               setLocacionesGlobal((prev) =>
-                prev.map((mundo) => ({
-                  ...mundo,
-                  locaciones: mundo.locaciones.map((l) =>
-                    l.id === loc.id ? { ...l, coords: [lng, lat] } : l
+                prev.map((m) => ({
+                  ...m,
+                  locaciones: m.locaciones.map((l) =>
+                    l.id === zonaId
+                      ? {
+                          ...l,
+                          sublocaciones: l.sublocaciones.map((s) =>
+                            s.id === loc.id ? { ...s, coords: [lng, lat] } : s
+                          ),
+                        }
+                      : l
                   ),
                 }))
               );
             }
-          },
-          dblclick: () => {
-            navigate(`/mapaZona/${loc.id}`);
           },
         }}
         icon={iconoInicial}
@@ -96,20 +101,13 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         <Popup>
           <h2 className="font-bold">{loc.nombre}</h2>
           <p>{loc.descripcion}</p>
-          {loc.imagenMapaMundi && (
-            <img
-              src={loc.imagenMapaMundi}
-              alt="Mapa miniatura"
-              className="w-40 h-24 object-cover mt-2 rounded-md border"
-            />
-          )}
         </Popup>
       </Marker>
     );
   });
 }
 
-// 🔹 Detecta clic derecho para abrir modal
+// 🔹 Captura clic derecho
 function RightClickMenu({ abrirModal }) {
   useMapEvent("contextmenu", (e) => {
     abrirModal(e.latlng);
@@ -117,37 +115,39 @@ function RightClickMenu({ abrirModal }) {
   return null;
 }
 
-// 🔹 Componente principal
-export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
-  const { id } = useParams();
-  const mundo = locaciones.find((l) => l.id === parseInt(id));
-  if (!mundo) return <div>Mundo no encontrado</div>;
+export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
+  const { id } = useParams(); // id de la locación (ej: ciudad)
+  let zona = null;
 
-  const [locacionesDelMundo, setLocacionesDelMundo] = useState(mundo.locaciones || []);
+  // Buscamos dentro de todas las locaciones globales
+  for (const mundo of locaciones) {
+    const encontrada = mundo.locaciones.find((l) => l.id === parseInt(id));
+    if (encontrada) {
+      zona = encontrada;
+      break;
+    }
+  }
+
+  if (!zona) return <div>Sitio no encontrado</div>;
+
+  const [sublocaciones, setSublocaciones] = useState(zona.sublocaciones || []);
   const [posiciones, setPosiciones] = useState(
-    locacionesDelMundo.reduce((acc, loc) => {
+    (zona.sublocaciones || []).reduce((acc, loc) => {
       acc[loc.id] = [loc.coords[1], loc.coords[0]];
       return acc;
     }, {})
   );
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    tipo: "ciudad",
-    descripcion: "",
-    imagenMapaMundi: "",
-  });
+  const [formData, setFormData] = useState({ nombre: "", tipo: "barrio", descripcion: "" });
   const [posicionClick, setPosicionClick] = useState(null);
 
-  // 🔹 Abre modal para nueva locación
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "" });
+    setFormData({ nombre: "", tipo: "barrio", descripcion: "" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
 
-  // 🔹 Guarda locación en estado local + global
   const guardarLocacion = () => {
     const nuevoId = Date.now();
     const nuevaLocacion = {
@@ -155,41 +155,34 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
       nombre: formData.nombre,
       tipo: formData.tipo,
       descripcion: formData.descripcion,
-      imagenMapaMundi: formData.imagenMapaMundi,
       coords: [posicionClick[1], posicionClick[0]],
-      tamano: 25,
+      tamano: 20,
     };
 
-    setLocacionesDelMundo([...locacionesDelMundo, nuevaLocacion]);
+    // 1️⃣ Local
+    setSublocaciones([...sublocaciones, nuevaLocacion]);
+
+    // 2️⃣ Global
     setLocaciones((prev) =>
-      prev.map((m) =>
-        m.id === mundo.id
-          ? { ...m, locaciones: [...m.locaciones, nuevaLocacion] }
-          : m
-      )
+      prev.map((m) => ({
+        ...m,
+        locaciones: m.locaciones.map((l) =>
+          l.id === zona.id ? { ...l, sublocaciones: [...(l.sublocaciones || []), nuevaLocacion] } : l
+        ),
+      }))
     );
+
+    // 3️⃣ Posiciones
     setPosiciones((prev) => ({ ...prev, [nuevoId]: posicionClick }));
     setModalVisible(false);
   };
-
-  // 🔹 Cambia imagen del mapa principal
-  const cargarMapa = () => {
-    if (formData.imagenMapaMundi.trim()) {
-      setLocaciones((prev) =>
-        prev.map((m) =>
-          m.id === mundo.id ? { ...m, imagenMapaMundi: formData.imagenMapaMundi } : m
-        )
-      );
-    }
-  };
-
+ console.log("",locaciones)
   return (
-    <div className="p-4 bg-gradient-to-b from-blue-200 to-blue-500 h-screen flex flex-col">
+    <div className="p-4 bg-gradient-to-b from-green-200 to-green-500 h-screen flex flex-col">
       <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white">{mundo.nombre}</h1>
-        <p className="mt-2 text-white">{mundo.descripcion}</p>
+        <h1 className="text-4xl font-bold text-white">{zona.nombre}</h1>
+        <p className="mt-2 text-white">{zona.descripcion}</p>
       </div>
-
       <div className="flex-1 relative">
         <MapContainer
           center={[bounds[1][0] / 2, bounds[1][1] / 2]}
@@ -200,49 +193,26 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
         >
-          <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
+          <ImageOverlay url={zona.imagenMapaMundi || ""} bounds={bounds} />
 
           <EscalarIconos
-            locaciones={locacionesDelMundo}
+            locaciones={sublocaciones}
             posiciones={posiciones}
             setPosiciones={setPosiciones}
             usuario={usuario}
             setLocacionesGlobal={setLocaciones}
+            zonaId={zona.id}
           />
 
           {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
         </MapContainer>
       </div>
 
-      {/* 🔹 Input para cargar mapa principal */}
-      <div className="mt-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="URL de imagen del mapa principal"
-          className="input input-bordered flex-1"
-          value={formData.imagenMapaMundi}
-          onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
-        />
-        <button className="btn btn-primary" onClick={cargarMapa}>
-          Cargar mapa
-        </button>
-      </div>
-
-      {/* 🔹 Modal Nueva Locación */}
+      {/* Modal */}
       {modalVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-96 overflow-auto">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
-
-            <input
-              type="text"
-              placeholder="URL de la imagen del mapa"
-              className="input input-bordered w-full mb-3"
-              value={formData.imagenMapaMundi}
-              onChange={(e) =>
-                setFormData({ ...formData, imagenMapaMundi: e.target.value })
-              }
-            />
+          <div className="bg-white rounded-xl shadow-xl p-6 w-96">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nuevo escenario</h2>
 
             <input
               type="text"
@@ -258,9 +228,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
               onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
             >
               {Object.keys(iconosBase).map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
+                <option key={tipo} value={tipo}>{tipo}</option>
               ))}
             </select>
 
@@ -268,9 +236,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
               placeholder="Descripción"
               className="textarea textarea-bordered w-full mb-4"
               value={formData.descripcion}
-              onChange={(e) =>
-                setFormData({ ...formData, descripcion: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
             />
 
             <div className="flex justify-end gap-2">
