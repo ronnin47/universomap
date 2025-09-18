@@ -111,11 +111,11 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
   );
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ nombre: "", tipo: "ciudad", descripcion: "" });
+  const [formData, setFormData] = useState({ imagenMapamundi:"",nombre: "", tipo: "ciudad", descripcion: "" });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "" });
+    setFormData({ imagenMapamundi:"",nombre: "", tipo: "ciudad", descripcion: "" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -127,6 +127,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
       nombre: formData.nombre,
       tipo: formData.tipo,
       descripcion: formData.descripcion,
+      imagenMapaMundi: formData.imagenMapaMundi,
       coords: [posicionClick[1], posicionClick[0]],
       tamano: 25,
       icono: iconosBase[formData.tipo] || "❓",
@@ -135,6 +136,10 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
     setPosiciones({ ...posiciones, [nuevoId]: posicionClick });
     setModalVisible(false);
   };
+
+
+
+
 
   return (
     <div className="w-full h-[70vh] p-1">
@@ -165,7 +170,16 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
         <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
           <div className="bg-white rounded-xl shadow-xl p-6 w-96">
             <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
-
+             
+               <input
+              type="text"
+              placeholder="URL de la imagen del mapa"
+              className="input input-bordered w-full mb-3"
+              value={formData.imagenMapaMundi}
+              onChange={(e) =>
+                setFormData({ ...formData, imagenMapaMundi: e.target.value })
+              }
+            />
             <input
               type="text"
               placeholder="Nombre"

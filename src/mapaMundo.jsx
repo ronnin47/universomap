@@ -79,7 +79,7 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
               setLocacionesGlobal((prev) =>
                 prev.map((mundo) => ({
                   ...mundo,
-                  locaciones: mundo.locaciones.map((l) =>
+                  locaciones: (mundo.locaciones || []).map((l) =>
                     l.id === loc.id ? { ...l, coords: [lng, lat] } : l
                   ),
                 }))
@@ -164,7 +164,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
     setLocaciones((prev) =>
       prev.map((m) =>
         m.id === mundo.id
-          ? { ...m, locaciones: [...m.locaciones, nuevaLocacion] }
+          ? { ...m, locaciones: [...(m.locaciones || []), nuevaLocacion] }
           : m
       )
     );
