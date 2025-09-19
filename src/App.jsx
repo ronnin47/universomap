@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import { Nav } from "./nav";
@@ -9,10 +9,72 @@ import { Foot } from "./foot";
 import { MapaUniverso } from "./mapaUniverso";
 import { MapaMundo } from "./mapaMundo";
 import { MapaZona } from "./mapaZona";
+import { MapaLocal } from "./mapaLocal";
 
+
+
+import axios from "axios";
 
 export const App=()=> {
+ 
   
+const [locaciones, setLocaciones] = useState([]);
+
+const usuario="narrador";
+//const usuario="jugador";
+
+useEffect(() => {
+  const consumirLocaciones = async () => {
+    try {
+      const response = await axios.get("http://localhost:10000/consumirLocaciones");
+      console.log("Datos recibidos desde backend:", response.data);
+      setLocaciones(response.data); // esto actualizará el estado
+    } catch (error) {
+      console.log("Error al consultar:", error.message);
+    }
+  };
+
+  consumirLocaciones();
+}, []);
+
+  return (
+    <>
+    <Router>
+
+       <div className="flex flex-col min-h-screen bg-base-200">
+          <Nav></Nav>
+
+         {/* Contenido dinámico */}
+        <main className="flex-1 p-2 bg-black">
+
+          <Routes>
+            <Route path="/" element={<Home usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
+            <Route path="/pagina1" element={<Pagina1 />} />
+            <Route path="/pagina2" element={<Pagina2 />} />
+             <Route path="/mapaUniverso" element={<MapaUniverso usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
+              <Route path="/mapaMundo/:id" element={<MapaMundo usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
+              <Route path="/mapaZona/:id" element={<MapaZona usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
+              <Route path="/mapaLocal/:id" element={<MapaLocal usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
+          </Routes>
+        
+        </main>
+
+        <Foot></Foot>
+       </div>
+
+    </Router>
+
+    </>
+  )
+}
+
+
+
+
+
+
+
+ /* 
 const loc = [
   { 
     id: 1, 
@@ -119,6 +181,7 @@ const loc = [
           coords: [378, 171.03330783938816],
           tipo: "armeria",
           tamano: 20,
+          imagenMapaMundi:"https://i.pinimg.com/736x/91/86/fe/9186fefcf353b077ada5401feb102cf3.jpg",
           descripcion: "estamos dentro de la descripcion del mirador estellar ahora"
         }
       ]
@@ -211,41 +274,4 @@ const loc = [
     locaciones: [] // Los soles no necesitan locaciones internas
   },
 ];
-
-const [locaciones,setLocaciones]=useState(loc)
-
-
-
-const usuario="narrador"
-
-  return (
-    <>
-    <Router>
-
-       <div className="flex flex-col min-h-screen bg-base-200">
-          <Nav></Nav>
-
-         {/* Contenido dinámico */}
-        <main className="flex-1 p-2 bg-black">
-
-          <Routes>
-            <Route path="/" element={<Home usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
-            <Route path="/pagina1" element={<Pagina1 />} />
-            <Route path="/pagina2" element={<Pagina2 />} />
-             <Route path="/mapaUniverso" element={<MapaUniverso usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
-              <Route path="/mapaMundo/:id" element={<MapaMundo usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
-              <Route path="/mapaZona/:id" element={<MapaZona usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
-          </Routes>
-        
-        </main>
-
-        <Foot></Foot>
-       </div>
-
-    </Router>
-
-    </>
-  )
-}
-
-
+*/

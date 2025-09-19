@@ -1,19 +1,22 @@
-// MapaZona.jsx
-import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 import { MapContainer, ImageOverlay, Marker, Popup, useMapEvent } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import axios from "axios";
 
-// Definimos los límites del mapa
+// 🔹 Límites del mapa
 const bounds = [
   [0, 0],
   [800, 1000],
 ];
 
-// Iconos según tipo de locación
+// 🔹 Iconos para tipos de locaciones
 const iconosBase = {
   mundo: "🌍",
+  mundoRojo: "🟥",
+  mundoVerde: "🟩",
+  mundoAzul: "🟦",
   ciudad: "🏛️",
   puerto: "⚓",
   aldea: "🏘️",
@@ -30,10 +33,10 @@ const iconosBase = {
   tierraNubando: "☁️",
   hereria: "🔨",
   sol: "☀️",
+  persona: "🧑",
 };
 
-// 🔹 Componente que escala los iconos según el zoom
-function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, zonaId }) {
+function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, abrirModalEliminar }) {
   const map = useMapEvent("zoom", () => {
     const zoom = map.getZoom();
     const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
@@ -54,6 +57,8 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
     });
   });
 
+  const navigate = useNavigate();
+
   return locaciones.map((loc) => {
     const iconoInicial = new L.DivIcon({
       html: `<span style="font-size:${loc.tamano}px">${iconosBase[loc.tipo] || "❓"}</span>`,
@@ -61,54 +66,63 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
       iconAnchor: [loc.tamano / 2, loc.tamano / 2],
     });
 
+    const posicion = posiciones[loc.id] || [bounds[1][0] / 2, bounds[1][1] / 2];
+
     return (
       <Marker
         key={loc.id}
-        position={posiciones[loc.id]}
+        position={posicion}
         draggable={usuario === "narrador"}
         eventHandlers={{
-          dragend: (e) => {
+          dragend: async (e) => {
             if (usuario === "narrador") {
               const { lat, lng } = e.target.getLatLng();
-
-              // Actualizamos posiciones locales
-              setPosiciones((prev) => ({
-                ...prev,
-                [loc.id]: [lat, lng],
-              }));
-
-              // Actualizamos coordenadas en el estado global
+              setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
               setLocacionesGlobal((prev) =>
-                prev.map((m) => ({
-                  ...m,
-                  locaciones: m.locaciones.map((l) =>
-                    l.id === zonaId
-                      ? {
-                          ...l,
-                          sublocaciones: l.sublocaciones.map((s) =>
-                            s.id === loc.id ? { ...s, coords: [lng, lat] } : s
-                          ),
-                        }
-                      : l
-                  ),
-                }))
+                prev.map((m) => (m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m))
               );
+
+              try {
+                const response = await axios.post("http://localhost:10000/actualizarCoordenadas", {
+                  id: loc.id,
+                  coords_x: lng,
+                  coords_y: lat,
+                });
+                if (!response.data.ok) console.log("Error al actualizar coordenadas:", response.data.error);
+              } catch (error) {
+                console.log("❌ Error en la actualización de coordenadas:", error.message);
+              }
             }
+          },
+          dblclick: () => navigate(`/mapaLocal/${loc.id}`),
+          contextmenu: () => {
+            if (usuario === "narrador") abrirModalEliminar(loc);
           },
         }}
         icon={iconoInicial}
         _locacion={loc}
       >
         <Popup>
-          <h2 className="font-bold">{loc.nombre}</h2>
-          <p>{loc.descripcion}</p>
+          <div className="flex flex-col gap-2">
+            <h2 className="font-bold">{loc.nombre}</h2>
+            <p>{loc.descripcion}</p>
+            {loc.imagenMapaMundi && (
+              <img
+                src={loc.imagenMapaMundi}
+                alt="Mapa miniatura"
+                className="w-40 h-24 object-cover mt-2 rounded-md border"
+              />
+            )}
+            <p className="text-sm text-gray-500">
+              Haz clic derecho sobre este ícono para eliminarlo.
+            </p>
+          </div>
         </Popup>
       </Marker>
     );
   });
 }
 
-// 🔹 Captura clic derecho
 function RightClickMenu({ abrirModal }) {
   useMapEvent("contextmenu", (e) => {
     abrirModal(e.latlng);
@@ -118,73 +132,112 @@ function RightClickMenu({ abrirModal }) {
 
 export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
   const { id } = useParams();
-  let zona = null;
-  let imagenMapa = null;
+  const ciudad = locaciones.find((l) => l.id === parseInt(id)) || {};
 
-  // Buscamos la locación dentro de todas las locaciones globales
-  for (const mundo of locaciones) {
-    const encontrada = mundo.locaciones.find((l) => l.id === parseInt(id));
-    if (encontrada) {
-      zona = encontrada;
-      imagenMapa = encontrada.imagenMapaMundi || mundo.imagenMapaMundi || null;
-      break;
-    }
-  }
-
-  console.log("locaciones de Mapa zona: ",locaciones);
-
-  if (!zona) return <div>Sitio no encontrado</div>;
-
-  const [sublocaciones, setSublocaciones] = useState(zona.sublocaciones || []);
-  const [posiciones, setPosiciones] = useState(
-    (zona.sublocaciones || []).reduce((acc, loc) => {
-      acc[loc.id] = [loc.coords[1], loc.coords[0]];
-      return acc;
-    }, {})
+  const locacionesDeZona = useMemo(
+    () => locaciones.filter((l) => l.capa === 2 && l.mundo === ciudad.id),
+    [locaciones, ciudad.id]
   );
 
+  const [posiciones, setPosiciones] = useState({});
+  useEffect(() => {
+    const nuevasPosiciones = locacionesDeZona.reduce((acc, loc) => {
+      if (loc.coords_x != null && loc.coords_y != null) {
+        acc[loc.id] = [parseFloat(loc.coords_y), parseFloat(loc.coords_x)];
+      }
+      return acc;
+    }, {});
+    setPosiciones(nuevasPosiciones);
+  }, [locacionesDeZona]);
+
   const [modalVisible, setModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ nombre: "", tipo: "barrio", descripcion: "" });
+  const [modalEliminarVisible, setModalEliminarVisible] = useState(false);
+  const [locacionSeleccionada, setLocacionSeleccionada] = useState(null);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    tipo: "ciudad",
+    descripcion: "",
+    imagenMapaMundi: "",
+  });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "barrio", descripcion: "" });
+    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
 
-  const guardarLocacion = () => {
-    const nuevoId = Date.now();
+  const abrirModalEliminar = (loc) => {
+    setLocacionSeleccionada(loc);
+    setModalEliminarVisible(true);
+  };
+
+  const eliminarLocacion = async () => {
+    if (!locacionSeleccionada) return;
+    try {
+      const response = await axios.post("http://localhost:10000/eliminarLocacion", { id: locacionSeleccionada.id });
+      if (response.data.ok) {
+        setLocaciones((prev) => prev.filter((loc) => loc.id !== locacionSeleccionada.id));
+        setPosiciones((prev) => {
+          const nuevo = { ...prev };
+          delete nuevo[locacionSeleccionada.id];
+          return nuevo;
+        });
+        setModalEliminarVisible(false);
+      } else {
+        console.log("Error al eliminar locación:", response.data.error);
+      }
+    } catch (error) {
+      console.log("❌ Error en eliminación:", error.message);
+    }
+  };
+
+  const guardarLocacionZona = async () => {
+    if (!posicionClick) return;
     const nuevaLocacion = {
-      id: nuevoId,
       nombre: formData.nombre,
       tipo: formData.tipo,
       descripcion: formData.descripcion,
-      coords: [posicionClick[1], posicionClick[0]],
+      imagenMapaMundi: formData.imagenMapaMundi,
+      coords_x: posicionClick[1],
+      coords_y: posicionClick[0],
       tamano: 20,
+      icono: iconosBase[formData.tipo] || "❓",
+      capa: 2,
+      mundo: ciudad.id,
     };
-
-    setSublocaciones([...sublocaciones, nuevaLocacion]);
-
-    setLocaciones((prev) =>
-      prev.map((m) => ({
-        ...m,
-        locaciones: m.locaciones.map((l) =>
-          l.id === zona.id ? { ...l, sublocaciones: [...(l.sublocaciones || []), nuevaLocacion] } : l
-        ),
-      }))
-    );
-
-    setPosiciones((prev) => ({ ...prev, [nuevoId]: posicionClick }));
-    setModalVisible(false);
+    try {
+      const response = await axios.post("http://localhost:10000/guardarLocacionMundo", nuevaLocacion);
+      if (response.data.ok) {
+        const locGuardada = response.data.locacion;
+        setLocaciones((prev) => [...prev, locGuardada]);
+        setPosiciones((prev) => ({ ...prev, [locGuardada.id]: [locGuardada.coords_y, locGuardada.coords_x] }));
+        setModalVisible(false);
+      } else {
+        console.log("Error al guardar locación:", response.data.error);
+      }
+    } catch (error) {
+      console.log("❌ Error en el POST:", error.message);
+    }
   };
 
+  const cargarMapa = () => {
+    if (formData.imagenMapaMundi.trim()) {
+      setLocaciones((prev) =>
+        prev.map((m) => (m.id === ciudad.id ? { ...m, imagenMapaMundi: formData.imagenMapaMundi } : m))
+      );
+    }
+  };
+
+  if (!ciudad.id) return <div>Ciudad no encontrada</div>;
+
   return (
-    <div className="p-4 bg-gradient-to-b from-green-200 to-green-500 h-screen flex flex-col">
+    <div className="p-4 bg-gradient-to-b from-blue-200 to-blue-500 h-screen flex flex-col">
       <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white">{zona.nombre}</h1>
-        <p className="mt-2 text-white">{zona.descripcion}</p>
+        <h1 className="text-4xl font-bold text-white">{ciudad.nombre}</h1>
+        <p className="mt-2 text-white">{ciudad.descripcion}</p>
       </div>
+
       <div className="flex-1 relative">
         <MapContainer
           center={[bounds[1][0] / 2, bounds[1][1] / 2]}
@@ -195,27 +248,44 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
         >
-          <ImageOverlay url={imagenMapa || ""} bounds={bounds} opacity={0.8} />
-
+          <ImageOverlay url={ciudad.imagenMapaMundi || ""} bounds={bounds} />
           <EscalarIconos
-            locaciones={sublocaciones}
+            locaciones={locacionesDeZona}
             posiciones={posiciones}
             setPosiciones={setPosiciones}
             usuario={usuario}
             setLocacionesGlobal={setLocaciones}
-            zonaId={zona.id}
+            abrirModalEliminar={abrirModalEliminar}
           />
-
           {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
         </MapContainer>
       </div>
 
-      {/* Modal */}
+      <div className="mt-4 flex gap-2">
+        <input
+          type="text"
+          placeholder="URL de imagen del mapa principal"
+          className="input input-bordered flex-1"
+          value={formData.imagenMapaMundi}
+          onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+        />
+        <button className="btn btn-primary" onClick={cargarMapa}>
+          Cargar mapa
+        </button>
+      </div>
+
       {modalVisible && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-96">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nuevo escenario</h2>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-96 overflow-auto">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
 
+            <input
+              type="text"
+              placeholder="URL de la imagen del mapa"
+              className="input input-bordered w-full mb-3"
+              value={formData.imagenMapaMundi}
+              onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+            />
             <input
               type="text"
               placeholder="Nombre"
@@ -223,7 +293,6 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
             />
-
             <select
               className="select select-bordered w-full mb-3"
               value={formData.tipo}
@@ -235,7 +304,6 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
                 </option>
               ))}
             </select>
-
             <textarea
               placeholder="Descripción"
               className="textarea textarea-bordered w-full mb-4"
@@ -244,10 +312,29 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
             />
 
             <div className="flex justify-end gap-2">
-              <button className="btn btn-primary" onClick={guardarLocacion}>
+              <button className="btn btn-primary" onClick={guardarLocacionZona}>
                 Guardar
               </button>
               <button className="btn btn-ghost" onClick={() => setModalVisible(false)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalEliminarVisible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-80">
+            <h2 className="text-xl font-bold mb-4">Eliminar Locación</h2>
+            <p>
+              ¿Seguro que quieres eliminar <strong>{locacionSeleccionada?.nombre}</strong>?
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="btn btn-error" onClick={eliminarLocacion}>
+                Eliminar
+              </button>
+              <button className="btn btn-ghost" onClick={() => setModalEliminarVisible(false)}>
                 Cancelar
               </button>
             </div>
