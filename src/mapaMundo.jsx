@@ -102,17 +102,27 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         icon={iconoInicial}
         _locacion={loc}
       >
-        <Popup>
-          <h2 className="font-bold">{loc.nombre}</h2>
-          <p>{loc.descripcion}</p>
-          {loc.imagenMapaMundi && (
-            <img
-              src={loc.imagenMapaMundi}
-              alt="Mapa miniatura"
-              className="w-40 h-24 object-cover mt-2 rounded-md border"
-            />
-          )}
-        </Popup>
+  <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
+  <div className="space-y-2">
+    <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">
+      {loc.nombre}
+    </h2>
+
+    {loc.imagenMapaMundi && (
+      <div className="w-40 h-24 overflow-hidden rounded-md border shadow-sm">
+        <img
+          src={loc.imagenMapaMundi}
+          alt="Mapa miniatura"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )}
+
+    <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">
+      {loc.descripcion}
+    </p>
+  </div>
+</Popup>
       </Marker>
     );
   });
@@ -229,7 +239,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
   if (!mundo.id) return <div>Mundo no encontrado</div>;
 
   return (
-    <div className="p-4 bg-gradient-to-b from-blue-200 to-blue-500 h-screen flex flex-col">
+    <div className="p-4 bg-gradient-to-b from-gray-200 to-black-500 h-screen flex flex-col">
       <div className="mb-4">
         <h1 className="text-4xl font-bold text-white">{mundo.nombre}</h1>
         <p className="mt-2 text-white">{mundo.descripcion}</p>
@@ -244,6 +254,8 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
           scrollWheelZoom
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
+          maxBounds={bounds}   
+          maxBoundsViscosity={1} 
         >
           <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
           <EscalarIconos
@@ -308,13 +320,15 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones }) => {
               value={formData.tamano || ""}
               onChange={(e) => setFormData({ ...formData, tamano: Number(e.target.value) })}
             >
-              <option value="" disabled>Selecciona tamaño...</option>
-              <option value="15">Diminuto (15)</option>
-              <option value="25">Pequeño (25)</option>
-              <option value="50">Mediano (50)</option>
-              <option value="75">Grande (75)</option>
-              <option value="100">Enorme (100)</option>
-              <option value="160">Descomunal (160)</option>
+             <option value="" disabled>
+                Selecciona tamaño...
+              </option>
+              <option value="5">Diminuto</option>
+              <option value="15">Pequeño</option>
+              <option value="25">Mediano</option>
+              <option value="50">Grande</option>
+              <option value="75">Enorme</option>
+              <option value="100">Descomunal</option>
             </select>
             <textarea
               placeholder="Descripción"

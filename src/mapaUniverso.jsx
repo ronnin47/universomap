@@ -10,7 +10,7 @@ const imagenMapa =
 
 const bounds = [
   [0, 0],
-  [800, 1000],
+  [1000, 1200],
 ];
 
 const iconosBase = {
@@ -105,10 +105,27 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setL
           }}
           _locacion={loc}
         >
-          <Popup className="bg-base-100 text-base-content p-4 rounded-xl shadow-lg border border-base-300">
-            <h2 className="font-bold text-lg text-primary">{loc.nombre}</h2>
-            <p className="text-sm">{loc.descripcion}</p>
-          </Popup>
+     <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
+  <div className="space-y-2">
+    <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">
+      {loc.nombre}
+    </h2>
+
+    {loc.imagenMapaMundi && (
+      <div className="w-40 h-24 overflow-hidden rounded-md border shadow-sm">
+        <img
+          src={loc.imagenMapaMundi}
+          alt="Mapa miniatura"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )}
+
+    <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">
+      {loc.descripcion}
+    </p>
+  </div>
+</Popup>
         </Marker>
       );
     });
@@ -158,6 +175,8 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
     }
   };
 
+
+  //guardar
   const guardarLocacion = async () => {
     if (!modalData?.latlng) return;
 
@@ -191,6 +210,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
     }
   };
 
+  //eliminar
   const eliminarLocacion = async (locacion) => {
   try {
     await axios.delete(`http://localhost:10000/eliminarLocacion/${locacion.id}`);
@@ -202,7 +222,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
 };
 
   return (
-    <div className="w-full h-[70vh] p-1">
+    <div className="w-full h-[60vh] p-1 ">
       <div className="card bg-base-200 shadow-xl rounded-2xl overflow-hidden h-full">
         <MapContainer
           center={[bounds[1][0] / 2, bounds[1][1] / 2]}
@@ -266,12 +286,12 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
               <option value="" disabled>
                 Selecciona tamaño...
               </option>
-              <option value="15">Diminuto (15)</option>
-              <option value="25">Pequeño (25)</option>
-              <option value="50">Mediano (50)</option>
-              <option value="75">Grande (75)</option>
-              <option value="100">Enorme (100)</option>
-              <option value="160">Descomunal (160)</option>
+                 <option value="5">Diminuto</option>
+              <option value="15">Pequeño</option>
+              <option value="25">Mediano</option>
+              <option value="50">Grande</option>
+              <option value="75">Enorme</option>
+              <option value="100">Descomunal</option>
             </select>
 
             <textarea

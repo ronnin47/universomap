@@ -102,22 +102,27 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         icon={iconoInicial}
         _locacion={loc}
       >
-        <Popup>
-          <div className="flex flex-col gap-2">
-            <h2 className="font-bold">{loc.nombre}</h2>
-            <p>{loc.descripcion}</p>
-            {loc.imagenMapaMundi && (
-              <img
-                src={loc.imagenMapaMundi}
-                alt="Mapa miniatura"
-                className="w-40 h-24 object-cover mt-2 rounded-md border"
-              />
-            )}
-            <p className="text-sm text-gray-500">
-              Haz clic derecho sobre este ícono para eliminarlo.
-            </p>
-          </div>
-        </Popup>
+  <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
+  <div className="space-y-2">
+    <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">
+      {loc.nombre}
+    </h2>
+
+    {loc.imagenMapaMundi && (
+      <div className="w-40 h-24 overflow-hidden rounded-md border shadow-sm">
+        <img
+          src={loc.imagenMapaMundi}
+          alt="Mapa miniatura"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    )}
+
+    <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">
+      {loc.descripcion}
+    </p>
+  </div>
+</Popup>
       </Marker>
     );
   });
@@ -247,6 +252,8 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
           scrollWheelZoom
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
+          maxBounds={bounds}   
+          maxBoundsViscosity={1} 
         >
           <ImageOverlay url={ciudad.imagenMapaMundi || ""} bounds={bounds} />
           <EscalarIconos

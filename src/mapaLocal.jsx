@@ -104,17 +104,19 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         icon={iconoInicial}
         _locacion={loc}
       >
-        <Popup>
-          <h2 className="font-bold">{loc.nombre}</h2>
-          <p>{loc.descripcion}</p>
-          {loc.imagenMapaMundi && (
-            <img
-              src={loc.imagenMapaMundi}
-              alt="Mapa miniatura"
-              className="w-40 h-24 object-cover mt-2 rounded-md border"
-            />
-          )}
-        </Popup>
+    <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
+  <div className="space-y-2">
+    <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">
+      {loc.nombre}
+    </h2>
+
+   
+
+    <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">
+      {loc.descripcion}
+    </p>
+  </div>
+</Popup>
       </Marker>
     );
   });
@@ -225,6 +227,8 @@ export const MapaLocal = ({ usuario, locaciones, setLocaciones }) => {
           scrollWheelZoom
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
+          maxBounds={bounds}   
+          maxBoundsViscosity={1} 
         >
           <ImageOverlay url={ciudad.imagenMapaMundi || ""} bounds={bounds} />
           <EscalarIconos
