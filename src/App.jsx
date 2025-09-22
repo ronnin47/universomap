@@ -28,7 +28,8 @@ useEffect(() => {
     try {
       const response = await axios.get("http://localhost:10000/consumirLocaciones");
       console.log("Datos recibidos desde backend:", response.data);
-      setLocaciones(response.data); // esto actualizará el estado
+         // si no viene nada, aseguramos array vacío
+      setLocaciones(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.log("Error al consultar:", error.message);
     }

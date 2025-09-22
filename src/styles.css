@@ -6,8 +6,64 @@
   background: none !important;
   border: none !important;
 }
+.token-redondo {
+  border: 2px solid black;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.token-redondo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* cubre todo el contenedor */
+  display: block;    /* evita espacio inferior por inline img */
+}
+.token-redondo:hover {
+  transform: scale(1.1);
+  box-shadow:
+    0 0 5px #e50914,          /* borde rojo cercano */
+    0 0 15px #ff1a1a,         /* resplandor más grande */
+    0 0 25px #ff4d4d,         /* glow difuso */
+    0 0 40px rgba(229, 9, 20, 0.5); /* glow extra suave */
+}
+
+/* amarillo opcional */
+.token-redondo.yellow:hover {
+   box-shadow:
+    0 0 5px #e50914,          /* borde rojo cercano */
+    0 0 15px #ff1a1a,         /* resplandor más grande */
+    0 0 25px #ff4d4d,         /* glow difuso */
+    0 0 40px rgba(229, 9, 20, 0.5); /* glow extra suave */
+}
 
 
+/* emoji también puede brillar y escalar */
+.token-emoji {
+  display: inline-block;
+  transition: text-shadow 0.3s ease, transform 0.3s ease;
+}
 
+.token-emoji:hover {
+  text-shadow:  0 0 5px #e50914,          /* borde rojo cercano */
+    0 0 15px #ff1a1a,         /* resplandor más grande */
+    0 0 25px #ff4d4d,         /* glow difuso */
+    0 0 40px rgba(229, 9, 20, 0.5);
+  transform: scale(1.1);
+}
 
+/* Clase para mini mapas con hover brillante */
+.borderHover img {
+  transition: all 0.3s ease;
+}
 
+.borderHover:hover img {
+  border: 2px solid #00f0ff; /* borde brillante */
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 30px #00f0ff; /* brillo */
+  transform: scale(1.05); /* pequeño zoom al pasar mouse */
+}

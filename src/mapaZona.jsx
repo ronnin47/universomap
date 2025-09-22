@@ -11,32 +11,192 @@ const bounds = [
   [800, 1000],
 ];
 
-// 🔹 Iconos para tipos de locaciones
 const iconosBase = {
+  // 🌍 Mundo / Lugares / Mapas
   mundo: "🌍",
-  mundoRojo: "🟥",
-  mundoVerde: "🟩",
-  mundoAzul: "🟦",
-  ciudad: "🏛️",
+  personaje: "🧑",
+  brujula: "🧭",
+  montaña: "⛰️",
+  volcán: "🌋",
+  río: "🌊",
+  isla: "🏝️",
+  bosque: "🌲",
+  árbol: "🌳",
+  hoja: "🍂",
+  hojaCaida: "🍁",
+  portal: "🌀",
+    ciudad: "🏛️",
   puerto: "⚓",
-  aldea: "🏘️",
-  villa: "🏠",
-  templo: "⛩️",
-  torre: "🗼",
-  posada: "🛏️",
-  academia: "🎓",
+
+  // 🏰 Construcciones / Ciudades / Lugares
+  casa: "🏠",
+  hogar: "🏡",
+  pueblo: "🏘️",
+  villa: "🏚️",
   castillo: "🏰",
-  plaza: "🏟️",
-  armeria: "⚔️",
-  luna: "🌙",
-  nidoDragon: "🐉",
-  tierraNubando: "☁️",
-  hereria: "🔨",
+  fuerte: "🏯",
+  templo: "⛩️",
+  iglesia: "⛪",
+  academia: "🎓",
+  posada: "🛏️",
+  mercado: "🏪",
+  torre: "🗼",
+  fábrica: "🏭",
+  taberna: "🍺",
+
+ cuartel: "🛡️",
+
+
+
+  
+  // 🐉 Criaturas / Animales / Personajes
+  dragón: "🐉",
+  serpiente: "🐍",
+  
+  monstruo: "👹",
+  demonio: "👿",
+  peligro: "💀",
+
+
   sol: "☀️",
-  persona: "🧑",
+  estrella: "⭐",
+  estrellaBrillante: "🌟",
+  cometa: "☄️",
+  meteorito: "🌠",
+  relámpago: "⚡",
+  nieve: "❄️",
+  portal: "🌌",
+
+
+  
+  // 🟢 Colores / Formas / Señales
+  rojo: "🔴",
+  naranja: "🟠",
+  amarillo: "🟡",
+  verde: "🟢",
+  azul: "🔵",
+  morado: "🟣",
+  blanco: "⚪",
+  negro: "⚫",
+  marrón: "🟤",
+  romboAzul: "🔷",
+  romboNaranja: "🔶",
+  romboPequeñoAzul: "🔹",
+  romboPequeñoNaranja: "🔸",
+  triánguloArriba: "🔺",
+  triánguloAbajo: "🔻",
+  cuadradoBlanco: "🔳",
+  cuadradoNegro: "🔲",
+  estrellaDecorativa: "✴️",
+  diamanteDecorativo: "💠",
+  círculoDecorativo: "⭕",
+  triánguloDecorativo: "🔺",
+  corazón: "❤️",
+  corazónRoto: "💔",
+  chispa: "✨",
+
+  
+
+  flechaArriba: "⬆️",
+  flechaAbajo: "⬇️",
+  flechaIzquierda: "⬅️",
+  flechaDerecha: "➡️",
+  flechaDiagonalArribaDerecha: "↗️",
+  flechaDiagonalAbajoDerecha: "↘️",
+  flechaDiagonalArribaIzquierda: "↖️",
+  flechaDiagonalAbajoIzquierda: "↙️",
+  dobleFlechaHorizontal: "↔️",
+  dobleFlechaVertical: "↕️",
+  triánguloArribaPequeño: "🔼",
+  triánguloAbajoPequeño: "🔽",
+  signoPregunta: "❓",
+  signoExclamacion: "❗",
+  banderaBlanca: "🏳️",
+  banderaNegra: "🏴",
+  banderaPirata: "🏴‍☠️",
+  
+  // 💎 Objetos / Recursos / Inventario
+
+  moneda: "💰",
+  joya: "💎",
+  pergamino: "📜",
+  libro: "📖",
+  ánfora: "🏺",
+  llave: "🗝️",
+  campana: "🛎️",
+  lámpara: "🪔",
+  vela: "🕯️",
+  piezaPuzzle: "🧩",
+  herramienta: "🛠️",
+  martilloYClavo: "⚒️",
+  espadaCruzada: "⚔️",
+
+  
+  // 🏁 Señales / Advertencias / Tráfico
+  advertencia: "⚠️",
+  prohibido: "🚫",
+  noEntrar: "⛔",
+  fuego: "🔥",
+  agua: "💧",
+  hielo: "🧊",
+  veneno: "☠️",
+  biohazard: "☣️",
+  radiación: "☢️",
+
+  pergaminoRoto: "📜",
+
+  numero0: "0️⃣",
+  numero1: "1️⃣",
+  numero2: "2️⃣",
+  numero3: "3️⃣",
+  numero4: "4️⃣",
+  numero5: "5️⃣",
+  numero6: "6️⃣",
+  numero7: "7️⃣",
+  numero8: "8️⃣",
+  numero9: "9️⃣",
+  cero: "0️⃣",
+  uno: "1️⃣",
+  dos: "2️⃣",
+  tres: "3️⃣",
+  cuatro: "4️⃣",
+  cinco: "5️⃣",
+  seis: "6️⃣",
+  siete: "7️⃣",
+  ocho: "8️⃣",
+  nueve: "9️⃣",
+};
+
+
+
+// 🔹 Función para crear icono desde URL o emoji
+const crearIcono = (iconoUrl, tipo, tamano = 32) => {
+  const icono = iconoUrl || iconosBase[tipo] || "❓";
+
+  if (
+    typeof icono === "string" &&
+    (icono.startsWith("http") || icono.endsWith(".svg") || icono.endsWith(".png") || icono.endsWith(".jpg"))
+  ) {
+    return new L.DivIcon({
+      html: `<div class="token-redondo" style="width:${tamano}px; height:${tamano}px;"><img src="${icono}" /></div>`,
+      className: "",
+      iconSize: [tamano, tamano],
+      iconAnchor: [tamano / 2, tamano / 2],
+      popupAnchor: [0, -tamano / 2],
+    });
+  }
+
+  return new L.DivIcon({
+    html: `<span class="token-emoji" style="font-size:${tamano}px">${icono}</span>`,
+    className: "",
+    iconSize: [tamano, tamano],
+    iconAnchor: [tamano / 2, tamano / 2],
+    popupAnchor: [0, -tamano / 2],
+  });
 };
 
 function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, abrirModalEliminar }) {
+  /*
   const map = useMapEvent("zoom", () => {
     const zoom = map.getZoom();
     const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
@@ -56,6 +216,23 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
       }
     });
   });
+*/
+   const map = useMapEvent("zoom", () => {
+      const zoom = map.getZoom();
+      const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
+  
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker && layer.options._locacion) {
+          const loc = layer.options._locacion;
+          const nuevoTamano = loc.tamano * factor;
+          layer.setIcon(crearIcono(loc.iconoUrl, loc.tipo, nuevoTamano));
+        }
+      });
+    });
+  
+
+
+  
 
   const navigate = useNavigate();
 
@@ -73,6 +250,7 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         key={loc.id}
         position={posicion}
         draggable={usuario === "narrador"}
+        icon={crearIcono(loc.iconoUrl, loc.tipo, loc.tamano)}
         eventHandlers={{
           dragend: async (e) => {
             if (usuario === "narrador") {
@@ -94,12 +272,22 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
               }
             }
           },
-          dblclick: () => navigate(`/mapaLocal/${loc.id}`),
-          contextmenu: () => {
-            if (usuario === "narrador") abrirModalEliminar(loc);
-          },
+         dblclick: () => {
+  if (loc.tipo !== "personaje") {
+    navigate(`/mapaZona/${loc.id}`);
+  }
+},
+
+contextmenu: () => {
+  if (usuario === "narrador") {
+    abrirModalEliminar(loc);
+  }
+},
+
+
+          
         }}
-        icon={iconoInicial}
+       
         _locacion={loc}
       >
   <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
@@ -138,11 +326,13 @@ function RightClickMenu({ abrirModal }) {
 export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
   const { id } = useParams();
   const ciudad = locaciones.find((l) => l.id === parseInt(id)) || {};
-
+ const navigate = useNavigate();
   const locacionesDeZona = useMemo(
     () => locaciones.filter((l) => l.capa === 2 && l.mundo === ciudad.id),
     [locaciones, ciudad.id]
   );
+
+  const locacionesCapa2 = locaciones.filter((loc) => loc.capa === 2 && loc.mundo === ciudad.id);
 
   const [posiciones, setPosiciones] = useState({});
   useEffect(() => {
@@ -163,11 +353,13 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
     tipo: "ciudad",
     descripcion: "",
     imagenMapaMundi: "",
+    tamano:"",
+    iconoUrl: "",
   });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "" });
+    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "",tamano:"", iconoUrl: "" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -177,25 +369,19 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
     setModalEliminarVisible(true);
   };
 
+ 
+
   const eliminarLocacion = async () => {
     if (!locacionSeleccionada) return;
     try {
-      const response = await axios.post("http://localhost:10000/eliminarLocacion", { id: locacionSeleccionada.id });
-      if (response.data.ok) {
-        setLocaciones((prev) => prev.filter((loc) => loc.id !== locacionSeleccionada.id));
-        setPosiciones((prev) => {
-          const nuevo = { ...prev };
-          delete nuevo[locacionSeleccionada.id];
-          return nuevo;
-        });
-        setModalEliminarVisible(false);
-      } else {
-        console.log("Error al eliminar locación:", response.data.error);
-      }
+      await axios.delete(`http://localhost:10000/eliminarLocacion/${locacionSeleccionada.id}`);
+      setLocaciones(prev => prev.filter(l => l.id !== locacionSeleccionada.id));
+      setModalEliminarVisible(false);
     } catch (error) {
-      console.log("❌ Error en eliminación:", error.message);
+      console.log("❌ Error eliminando locación:", error.message);
     }
   };
+  
 
   const guardarLocacionZona = async () => {
     if (!posicionClick) return;
@@ -204,9 +390,10 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
       tipo: formData.tipo,
       descripcion: formData.descripcion,
       imagenMapaMundi: formData.imagenMapaMundi,
+      iconoUrl: formData.iconoUrl || null,
       coords_x: posicionClick[1],
       coords_y: posicionClick[0],
-      tamano: 20,
+      tamano: formData.tamano,
       icono: iconosBase[formData.tipo] || "❓",
       capa: 2,
       mundo: ciudad.id,
@@ -235,15 +422,89 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
   };
 
   if (!ciudad.id) return <div>Ciudad no encontrada</div>;
+return (
+  <div className="p-4 bg-gradient-to-b from-green-200 to-black-500 h-screen flex flex-col">
+    <div className="mb-4">
+      <h1 className="text-4xl font-bold text-white">{ciudad.nombre}</h1>
+      <p className="mt-2 text-white">{ciudad.descripcion}</p>
+    </div>
 
-  return (
-    <div className="p-4 bg-gradient-to-b from-blue-200 to-blue-500 h-screen flex flex-col">
-      <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white">{ciudad.nombre}</h1>
-        <p className="mt-2 text-white">{ciudad.descripcion}</p>
+    {modalVisible && (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
+        <div className="bg-white rounded-xl shadow-xl p-6 w-96 overflow-auto">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
+
+          <input
+            type="text"
+            placeholder="URL de la imagen del mapa"
+            className="input input-bordered w-full mb-3"
+            value={formData.imagenMapaMundi}
+            onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Nombre"
+            className="input input-bordered w-full mb-3"
+            value={formData.nombre}
+            onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+          />
+          <select
+            className="select select-bordered w-full mb-3"
+            value={formData.tipo}
+            onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+          >
+            {Object.keys(iconosBase).map((tipo) => (
+              <option key={tipo} value={tipo}>
+                {tipo}
+              </option>
+            ))}
+          </select>
+
+            <input
+              type="text"
+              placeholder="URL del icono (opcional)"
+              className="input input-bordered w-full mb-3"
+              value={formData.iconoUrl}
+              onChange={(e) => setFormData({ ...formData, iconoUrl: e.target.value })}
+            />
+
+          <select
+            className="select select-bordered w-full mb-3"
+            value={formData.tamano || ""}
+            onChange={(e) => setFormData({ ...formData, tamano: Number(e.target.value) })}
+          >
+            <option value="" disabled>
+              Selecciona tamaño...
+            </option>
+            <option value="5">Diminuto</option>
+            <option value="15">Pequeño</option>
+            <option value="25">Mediano</option>
+            <option value="50">Grande</option>
+            <option value="75">Enorme</option>
+            <option value="100">Descomunal</option>
+          </select>
+          <textarea
+            placeholder="Descripción"
+            className="textarea textarea-bordered w-full mb-4"
+            value={formData.descripcion}
+            onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+          />
+
+          <div className="flex justify-end gap-2">
+            <button className="btn btn-primary" onClick={guardarLocacionZona}>
+              Guardar
+            </button>
+            <button className="btn btn-ghost" onClick={() => setModalVisible(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
       </div>
+    )}
 
-      <div className="flex-1 relative">
+    <div className="w-full h-[60vh] p-1 flex gap-5">
+      {/* 🔹 Mapa principal */}
+      <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
         <MapContainer
           center={[bounds[1][0] / 2, bounds[1][1] / 2]}
           zoom={1}
@@ -252,8 +513,8 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
           scrollWheelZoom
           crs={L.CRS.Simple}
           className="w-full h-[60vh] rounded-2xl"
-          maxBounds={bounds}   
-          maxBoundsViscosity={1} 
+          maxBounds={bounds}
+          maxBoundsViscosity={1}
         >
           <ImageOverlay url={ciudad.imagenMapaMundi || ""} bounds={bounds} />
           <EscalarIconos
@@ -268,86 +529,62 @@ export const MapaZona = ({ usuario, locaciones, setLocaciones }) => {
         </MapContainer>
       </div>
 
-      <div className="mt-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="URL de imagen del mapa principal"
-          className="input input-bordered flex-1"
-          value={formData.imagenMapaMundi}
-          onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
-        />
-        <button className="btn btn-primary" onClick={cargarMapa}>
-          Cargar mapa
-        </button>
-      </div>
-
-      {modalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-96 overflow-auto">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
-
-            <input
-              type="text"
-              placeholder="URL de la imagen del mapa"
-              className="input input-bordered w-full mb-3"
-              value={formData.imagenMapaMundi}
-              onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Nombre"
-              className="input input-bordered w-full mb-3"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            />
-            <select
-              className="select select-bordered w-full mb-3"
-              value={formData.tipo}
-              onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+      {/* 🔹 Panel lateral con mini mapas */}
+     <div className="flex flex-col gap-3 w-32 overflow-y-auto  p-3">
+        {locacionesCapa2
+          .filter((loc) => loc.tipo !== "personaje") // 🔹 Oculta personas en el panel lateral
+          .map((loc) => (
+            <div
+              key={loc.id}
+               className="flex-shrink-0 cursor-pointer text-center borderHover"
+              onClick={() => {
+                if (loc.tipo !== "personaje") {
+                  navigate(`/mapaZona/${loc.id}`);
+                }
+              }}
             >
-              {Object.keys(iconosBase).map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
-            <textarea
-              placeholder="Descripción"
-              className="textarea textarea-bordered w-full mb-4"
-              value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-            />
-
-            <div className="flex justify-end gap-2">
-              <button className="btn btn-primary" onClick={guardarLocacionZona}>
-                Guardar
-              </button>
-              <button className="btn btn-ghost" onClick={() => setModalVisible(false)}>
-                Cancelar
-              </button>
+              <img
+                src={loc.imagenMapaMundi || "/placeholder-map.png"}
+                alt={loc.nombre}
+                className="w-24 h-16 object-cover rounded-lg border border-white/50"
+              />
+              <span className="text-white text-sm block mt-1">{loc.nombre}</span>
             </div>
-          </div>
-        </div>
-      )}
-
-      {modalEliminarVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-80">
-            <h2 className="text-xl font-bold mb-4">Eliminar Locación</h2>
-            <p>
-              ¿Seguro que quieres eliminar <strong>{locacionSeleccionada?.nombre}</strong>?
-            </p>
-            <div className="flex justify-end gap-2 mt-4">
-              <button className="btn btn-error" onClick={eliminarLocacion}>
-                Eliminar
-              </button>
-              <button className="btn btn-ghost" onClick={() => setModalEliminarVisible(false)}>
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          ))}
+      </div>
     </div>
-  );
+
+    <div className="mt-4 flex gap-2">
+      <input
+        type="text"
+        placeholder="URL de imagen del mapa principal"
+        className="input input-bordered flex-1"
+        value={formData.imagenMapaMundi}
+        onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+      />
+      <button className="btn btn-primary" onClick={cargarMapa}>
+        Cargar mapa
+      </button>
+    </div>
+
+    {modalEliminarVisible && (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
+        <div className="bg-white rounded-xl shadow-xl p-6 w-80">
+          <h2 className="text-xl font-bold mb-4">Eliminar Locación</h2>
+          <p>
+            ¿Seguro que quieres eliminar <strong>{locacionSeleccionada?.nombre}</strong>?
+          </p>
+          <div className="flex justify-end gap-2 mt-4">
+            <button className="btn btn-error" onClick={eliminarLocacion}>
+              Eliminar
+            </button>
+            <button className="btn btn-ghost" onClick={() => setModalEliminarVisible(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 };

@@ -54,16 +54,16 @@ app.get("/consumirLocaciones", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM locaciones;");
     console.log("Lo que me trae de bbdd", result.rows);
-    res.json(result.rows); // 
-    
 
+    // Si no hay filas, devolver array vacío
+    res.json(result.rows || []);
   } catch (error) {
     console.error("❌ Error al consumir locaciones:", error);
-    res.status(500).json({ error: "Error al obtener locaciones" });
+
+    // Ante error, igual devolvemos []
+    res.json([]);
   }
 });
-
-
 
 // POST: guardar locación
 app.post("/guardarLocacion", async (req, res) => {
@@ -77,6 +77,7 @@ app.post("/guardarLocacion", async (req, res) => {
     tamano,
     icono,
     capa,
+    iconoUrl
   } = req.body;
   
   console.log("Lo que viene del cliente: ", req.body);
@@ -85,11 +86,11 @@ app.post("/guardarLocacion", async (req, res) => {
     // 1️⃣ Insertamos la locación
     const queryInsert = `
       INSERT INTO locaciones
-      (nombre, tipo, descripcion, "imagenMapaMundi", coords_x, coords_y, tamano, icono, capa)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (nombre, tipo, descripcion, "imagenMapaMundi", coords_x, coords_y, tamano, icono, capa,"iconoUrl")
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *;
     `;
-    const values = [nombre, tipo, descripcion, imagenMapaMundi, coords_x, coords_y, tamano, icono, capa];
+    const values = [nombre, tipo, descripcion, imagenMapaMundi, coords_x, coords_y, tamano, icono, capa,iconoUrl];
     const resultInsert = await pool.query(queryInsert, values);
     const nuevaLocacion = resultInsert.rows[0];
 
@@ -116,6 +117,7 @@ app.post("/guardarLocacionMundo", async (req, res) => {
     tipo,
     descripcion,
     imagenMapaMundi,
+    iconoUrl,
     coords_x,
     coords_y,
     tamano,
@@ -130,11 +132,11 @@ app.post("/guardarLocacionMundo", async (req, res) => {
     // 1️⃣ Insertamos la locación directamente con el campo mundo
     const queryInsert = `
       INSERT INTO locaciones
-      (nombre, tipo, descripcion, "imagenMapaMundi", coords_x, coords_y, tamano, icono, capa, mundo)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, $10)
+      (nombre, tipo, descripcion, "imagenMapaMundi","iconoUrl",coords_x, coords_y, tamano, icono, capa, mundo)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, $10,$11)
       RETURNING *;
     `;
-    const values = [nombre, tipo, descripcion, imagenMapaMundi, coords_x, coords_y, tamano, icono, capa, mundo];
+    const values = [nombre, tipo, descripcion, imagenMapaMundi,iconoUrl, coords_x, coords_y, tamano, icono, capa, mundo];
     const resultInsert = await pool.query(queryInsert, values);
     const nuevaLocacion = resultInsert.rows[0];
 
