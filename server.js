@@ -204,6 +204,65 @@ app.delete("/eliminarLocacion/:id", async (req, res) => {
 });
 
 
+
+// 📌 Endpoint: actualizar un mundo
+app.put("/actualizarMundo/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    descripcion,
+    imagenMapaMundi,
+    tipo,
+    iconoUrl,
+    tamano,
+    coords_x,
+    coords_y,
+    capa,
+  } = req.body;
+
+  try {
+    const query = `
+      UPDATE locaciones
+      SET 
+        nombre = $1,
+        descripcion = $2,
+        "imagenMapaMundi" = $3,
+        tipo = $4,
+        "iconoUrl" = $5,
+        tamano = $6,
+        coords_x = $7,
+        coords_y = $8,
+        capa = $9
+      WHERE id = $10
+      RETURNING *;
+    `;
+
+    const values = [
+      nombre,
+      descripcion,
+      imagenMapaMundi,
+      tipo,
+      iconoUrl,
+      tamano,
+      coords_x,
+      coords_y,
+      capa,
+      id,
+    ];
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ ok: false, msg: "Mundo no encontrado" });
+    }
+
+    res.json({ ok: true, mundo: result.rows[0] });
+  } catch (error) {
+    console.error("❌ Error al actualizar mundo:", error.message);
+    res.status(500).json({ ok: false, msg: "Error interno del servidor" });
+  }
+});
+
 // 🔹 Levantar servidor
 app.listen(PORT, () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);

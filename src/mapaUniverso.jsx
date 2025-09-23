@@ -13,6 +13,8 @@ const bounds = [
   [1000, 1200],
 ];
 
+
+
 const iconosBase = {
     mundo: "🌍",
   mundoA: "https://res.cloudinary.com/dzul1hatw/image/upload/v1758479696/mundoA_mawo4o.svg",
@@ -145,6 +147,98 @@ const iconosBase = {
   nueve: "9️⃣",
 };
 
+
+
+
+
+export function CuadriculaMapa({ bounds, paso = 50, visible }) {
+  const map = useMapEvent("zoom", () => {});
+  const [rectangles, setRectangles] = useState([]);
+  const [toast, setToast] = useState(null); // { x, y, left, top }
+
+  useEffect(() => {
+    if (!visible) {
+      rectangles.forEach((rect) => rect.remove());
+      setRectangles([]);
+      return;
+    }
+
+    const rects = [];
+    const [yMin, xMin] = bounds[0];
+    const [yMax, xMax] = bounds[1];
+
+    for (let y = yMin; y < yMax; y += paso) {
+      for (let x = xMin; x < xMax; x += paso) {
+        const rectBounds = [[y, x], [y + paso, x + paso]];
+const rect = L.rectangle(rectBounds, {
+  color: "#ffffff",        // borde blanco brillante
+  weight: 1,               // borde más grueso
+  fillColor: "#ffffff33",  // blanco semi-transparente para brillo sutil
+  fillOpacity: 0.15,       // muy transparente
+  dashArray: "3 3",        // línea punteada para efecto futurista
+}).addTo(map);
+
+
+
+        rect.on("click", (e) => {
+          // Alterna opacidad
+          rect.setStyle({ fillOpacity: rect.options.fillOpacity === 0 ? 0.2 : 0 });
+
+          // Coordenadas X,Y (centro del cuadrante)
+          const centroX = (x + (x + paso)) / 2;
+          const centroY = (y + (y + paso)) / 2;
+
+          // Convertir lat/lng a posición de pantalla
+          const point = map.latLngToContainerPoint(e.latlng);
+
+          setToast({
+            x: centroX.toFixed(0),
+            y: centroY.toFixed(0),
+            left: point.x,
+            top: point.y,
+          });
+
+          // Desaparece en 2 segundos
+          setTimeout(() => setToast(null), 2000);
+        });
+
+        rects.push(rect);
+      }
+    }
+
+    setRectangles(rects);
+
+    return () => rects.forEach((r) => r.remove());
+  }, [visible, bounds, paso, map]);
+
+  return (
+    <>
+      {toast && (
+        <div
+          style={{
+            position: "absolute",
+            left: toast.left,
+            top: toast.top,
+            transform: "translate(-50%, -100%)",
+            background: "rgba(0,0,0,0.8)",
+            color: "white",
+            padding: "6px 10px",
+            borderRadius: "6px",
+            fontFamily: "monospace",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+        >
+          X: {toast.x}, Y: {toast.y}
+        </div>
+      )}
+    </>
+  );
+}
+
+
+
+
 // 🔹 Función para crear icono desde URL o emoji
 const crearIcono = (iconoUrl, tipo, tamano = 32) => {
   const icono = iconoUrl || iconosBase[tipo] || "❓";
@@ -177,8 +271,7 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
   });
 };
 
-// 🔹 Escalar iconos y permitir moverlos
-function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setLocaciones, abrirModal }) {
+function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setLocaciones, abrirModal,  }) {
   const map = useMapEvent("zoom", () => {
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker && layer.options._locacion) {
@@ -214,45 +307,24 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setL
                   )
                 );
               }
-              try {
-                await axios.post("http://localhost:10000/actualizarCoordenadas", {
-                  id: loc.id,
-                  coords_x: lng,
-                  coords_y: lat,
-                });
-                console.log(`Locación ${loc.id} actualizada en DB`);
-              } catch (error) {
-                console.error("❌ Error al actualizar coordenadas:", error.message);
-              }
             },
 
-             dblclick: () => {
+            dblclick: () => {
               if (loc.tipo !== "personaje") {
+               
                 navigate(`/mapaMundo/${loc.id}`);
               }
             },
-       
+
             contextmenu: () => abrirModal({ tipo: "eliminar", locacion: loc }),
           }}
           _locacion={loc}
         >
-          <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
+          <Popup closeOnClick={false}>
             <div className="space-y-2">
-              <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">
-                {loc.nombre}
-              </h2>
-              {loc.imagenMapaMundi && (
-                <div className="w-40 h-24 overflow-hidden rounded-md border shadow-sm">
-                  <img
-                    src={loc.imagenMapaMundi}
-                    alt="Mapa miniatura"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">
-                {loc.descripcion}
-              </p>
+              <h2>{loc.nombre}</h2>
+              {loc.imagenMapaMundi && <img src={loc.imagenMapaMundi} alt="Mapa miniatura" />}
+              <p>{loc.descripcion}</p>
             </div>
           </Popup>
         </Marker>
@@ -270,6 +342,7 @@ function RightClickMenu({ abrirModal }) {
 
 // 🔹 Mapa Universo
 export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
+  const [mostrarCuadricula, setMostrarCuadricula] = useState(false);
   const esNarrador = usuario === "narrador";
   const [posiciones, setPosiciones] = useState({});
   const [modalData, setModalData] = useState(null);
@@ -283,6 +356,11 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
   });
 
   const navigate = useNavigate();
+
+
+
+
+
 
   useEffect(() => {
     const nuevasPosiciones = locaciones.reduce((acc, loc) => {
@@ -353,6 +431,19 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
 
   return (
     <div className="w-full h-[50vh] p-1">
+
+
+   <button
+  className="relative inline-flex items-center justify-center px-3 py-1.5 mb-2 text-sm font-medium text-white rounded-md group bg-transparent border border-white/50 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_10px_#00f8ff]"
+  onClick={() => setMostrarCuadricula((prev) => !prev)}
+>
+  <span className="absolute inset-0 w-full h-full rounded-md bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-20"></span>
+  <span className="relative">
+    {mostrarCuadricula ? "Ocultar cuadrícula" : "Mostrar cuadrícula"}
+  </span>
+</button>
+
+
       <div className="w-full h-[60vh] p-1 flex gap-5">
         {/* 🔹 Mapa principal */}
         <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
@@ -368,6 +459,10 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
             maxBoundsViscosity={1}
           >
             <ImageOverlay url={imagenMapa} bounds={bounds} />
+
+             {/* 🔹 Aquí va la cuadrícula */}
+  {mostrarCuadricula && <CuadriculaMapa bounds={bounds} paso={10} visible={mostrarCuadricula} />}
+
             <EscalarIconos
               locaciones={locaciones}
               posiciones={posiciones}
@@ -390,6 +485,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
                 className="flex-shrink-0 cursor-pointer text-center borderHover"
                 onClick={() => {
                   if (loc.tipo !== "personaje") {
+               
                     navigate(`/mapaMundo/${loc.id}`);
                   }
                 }}

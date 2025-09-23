@@ -1,5 +1,5 @@
-import { useState,useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { Nav } from "./nav";
 import { Pagina1 } from "./pagina1";
@@ -8,66 +8,64 @@ import { Home } from "./home";
 import { Foot } from "./foot";
 import { MapaUniverso } from "./mapaUniverso";
 import { MapaMundo } from "./mapaMundo";
-import { MapaZona } from "./mapaZona";
-import { MapaLocal } from "./mapaLocal";
-
 
 
 import axios from "axios";
 
-export const App=()=> {
+export const App = () => {
+  const [locaciones, setLocaciones] = useState([]);
+  const usuario = "narrador";
  
-  
-const [locaciones, setLocaciones] = useState([]);
 
-const usuario="narrador";
-//const usuario="jugador";
 
-useEffect(() => {
-  const consumirLocaciones = async () => {
-    try {
-      const response = await axios.get("http://localhost:10000/consumirLocaciones");
-      console.log("Datos recibidos desde backend:", response.data);
-         // si no viene nada, aseguramos array vacío
-      setLocaciones(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.log("Error al consultar:", error.message);
-    }
-  };
-
-  consumirLocaciones();
-}, []);
+   const [historialMapas, setHistorialMapas] = useState([]);
+  useEffect(() => {
+    const consumirLocaciones = async () => {
+      try {
+        const response = await axios.get("http://localhost:10000/consumirLocaciones");
+        setLocaciones(Array.isArray(response.data) ? response.data : []);
+      } catch (error) {
+        console.log("Error al consultar:", error.message);
+      }
+    };
+    consumirLocaciones();
+  }, []);
 
   return (
-    <>
     <Router>
+      <div className="flex flex-col min-h-screen bg-base-200">
+        <Nav />
 
-       <div className="flex flex-col min-h-screen bg-base-200">
-          <Nav></Nav>
+        {/* Contenedor que empuja el footer */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <main className="flex-1 flex flex-col bg-black overflow-auto">
+            <Routes>
+              <Route path="/" element={<Home usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
+              <Route path="/pagina1" element={<Pagina1 />} />
+              <Route path="/pagina2" element={<Pagina2 />} />
+              <Route path="/mapaUniverso" element={<MapaUniverso 
+                    usuario={usuario} 
+                    locaciones={locaciones} 
+                    setLocaciones={setLocaciones}
+                    />} />
+              <Route path="/mapaMundo/:id" element={<MapaMundo 
+                    usuario={usuario} 
+                    locaciones={locaciones} 
+                    setLocaciones={setLocaciones} 
+                    historialMapas={historialMapas}
+                    setHistorialMapas={setHistorialMapas}
+                   />} />
+            
+            </Routes>
+          </main>
+        </div>
 
-         {/* Contenido dinámico */}
-        <main className="flex-1 p-2 bg-black">
-
-          <Routes>
-            <Route path="/" element={<Home usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
-            <Route path="/pagina1" element={<Pagina1 />} />
-            <Route path="/pagina2" element={<Pagina2 />} />
-             <Route path="/mapaUniverso" element={<MapaUniverso usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
-              <Route path="/mapaMundo/:id" element={<MapaMundo usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones} />} />
-              <Route path="/mapaZona/:id" element={<MapaZona usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
-              <Route path="/mapaLocal/:id" element={<MapaLocal usuario={usuario} locaciones={locaciones} setLocaciones={setLocaciones}/>} />
-          </Routes>
-        
-        </main>
-
-        <Foot></Foot>
-       </div>
-
+        <Foot />
+      </div>
     </Router>
+  );
+};
 
-    </>
-  )
-}
 
 
 
