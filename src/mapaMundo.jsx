@@ -225,17 +225,19 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         }}
         _locacion={loc}
       >
-        <Popup className="bg-base-100 text-base-content p-4 rounded-2xl shadow-xl border border-base-300 max-w-xs">
-          <div className="space-y-2">
-            <h2 className="font-bold text-xl text-primary border-b border-base-300 pb-1 break-words">{loc.nombre}</h2>
-            {loc.imagenMapaMundi && (
-              <div className="w-40 h-24 overflow-hidden rounded-md border shadow-sm">
-                <img src={loc.imagenMapaMundi} alt="Mapa miniatura" className="w-full h-full object-cover" />
-              </div>
-            )}
-            <p className="text-sm leading-relaxed text-base-content/80 break-words max-w-full">{loc.descripcion}</p>
-          </div>
-        </Popup>
+       <Popup closeOnClick={true} className="!p-0">
+  <div className="space-y-3 w-64 p-1">
+    <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
+    {loc.imagenMapaMundi && (
+      <img
+        src={loc.imagenMapaMundi}
+        alt="Mapa miniatura"
+        className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
+      />
+    )}
+    <p className="text-gray-300 text-sm leading-snug">{loc.descripcion}</p>
+  </div>
+</Popup>
       </Marker>
     );
   });
@@ -270,6 +272,27 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
 
   agregarAlHistorial();
 }, [id, setHistorialMapas]);
+
+
+
+// Cada vez que cambie `mundo`, reiniciamos `camposMundo` con sus valores
+useEffect(() => {
+  if (mundo) {
+    setCamposMundo({
+      nombre: mundo.nombre || "",
+      descripcion: mundo.descripcion || "",
+      imagenMapa: mundo.imagenMapaMundi || "",
+      tipo: mundo.tipo || "",
+      icono: mundo.iconoUrl || "",
+      tamano: mundo.tamano || 0,
+      capa: mundo.capa || 0,
+      x: mundo.coords_x || 0,
+      y: mundo.coords_y || 0,
+    });
+  }
+}, [mundo]);
+
+
 
  const irAtras = () => {
   setHistorialMapas(prev => {
@@ -647,6 +670,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
           Guardar cambios
         </button>
       </div>
+
     </div>
   </div>
 )}

@@ -6,7 +6,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const imagenMapa =
-  "https://e0.pxfuel.com/wallpapers/879/583/desktop-wallpaper-pastel-plain-light-blue-background-light-blue-pastel.jpg";
+  //"https://e0.pxfuel.com/wallpapers/879/583/desktop-wallpaper-pastel-plain-light-blue-background-light-blue-pastel.jpg";
+//"https://cdn.pixabay.com/photo/2019/07/26/14/50/heavenly-4364897_1280.jpg"
+//"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm6LNylOFtL2XYb1JYsJvFN8qfhGVDVJ1qaA&s"
+"https://img.freepik.com/foto-gratis/nubes-al-estilo-anime_23-2151071684.jpg?semt=ais_incoming&w=740&q=80"
+
 
 const bounds = [
   [0, 0],
@@ -240,7 +244,7 @@ const rect = L.rectangle(rectBounds, {
 
 
 // 🔹 Función para crear icono desde URL o emoji
-const crearIcono = (iconoUrl, tipo, tamano = 32) => {
+const crearIcono = (loc,iconoUrl, tipo, tamano = 32) => {
   const icono = iconoUrl || iconosBase[tipo] || "❓";
 
   // Si es URL de imagen
@@ -261,6 +265,19 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
     });
   }
 
+//veremos en el futuro
+// Si es la Estrella Amateratsu → icono brillante
+  if (loc.nombre =="Estrella Amateratsu") {
+
+    return new L.DivIcon({
+      className: "icono-amateratsu",
+      html: `<span class="token-emoji estrella-brillante" style="font-size:${tamano}px">${icono}</span>`,
+      iconSize: [tamano, tamano],
+      iconAnchor: [tamano / 2, tamano / 2],
+      popupAnchor: [0, -tamano / 2],
+    });
+  }
+
   // Si es emoji
   return new L.DivIcon({
     html: `<span class="token-emoji" style="font-size:${tamano}px">${icono}</span>`,
@@ -271,13 +288,13 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
   });
 };
 
-function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setLocaciones, abrirModal,  }) {
+function EscalarIconos({ usuario,locaciones, posiciones, setPosiciones, esNarrador, setLocaciones, abrirModal,  }) {
   const map = useMapEvent("zoom", () => {
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker && layer.options._locacion) {
         const loc = layer.options._locacion;
         const nuevoTamano = loc.tamano * map.getZoom();
-        layer.setIcon(crearIcono(loc.iconoUrl, loc.tipo, nuevoTamano));
+        layer.setIcon(crearIcono(loc,loc.iconoUrl, loc.tipo, nuevoTamano));
       }
     });
   });
@@ -294,20 +311,29 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setL
         <Marker
           key={`marker-${loc.id}`}
           position={pos}
-          icon={crearIcono(loc.iconoUrl, loc.tipo, loc.tamano)}
+          icon={crearIcono(loc,loc.iconoUrl, loc.tipo, loc.tamano)}
           draggable={esNarrador}
           eventHandlers={{
-            dragend: async (e) => {
+             dragend: async (e) => {
+            if (usuario === "narrador") {
               const { lat, lng } = e.target.getLatLng();
               setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
-              if (esNarrador && setLocaciones) {
-                setLocaciones((prev) =>
-                  prev.map((l) =>
-                    l.id === loc.id ? { ...l, coords_x: lng, coords_y: lat } : l
-                  )
+              setLocaciones(prev =>
+                prev.map(m => m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m)
+              );
+              try {
+                const response = await axios.post(
+                  "http://localhost:10000/actualizarCoordenadas",
+                  { id: loc.id, coords_x: lng, coords_y: lat }
                 );
+                if (!response.data.ok) console.log("Error al actualizar coordenadas:", response.data.error);
+              } catch (error) {
+                console.log("❌ Error en la actualización de coordenadas:", error.message);
               }
-            },
+            }
+          },
+
+            
 
             dblclick: () => {
               if (loc.tipo !== "personaje") {
@@ -320,13 +346,19 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, esNarrador, setL
           }}
           _locacion={loc}
         >
-          <Popup closeOnClick={false}>
-            <div className="space-y-2">
-              <h2>{loc.nombre}</h2>
-              {loc.imagenMapaMundi && <img src={loc.imagenMapaMundi} alt="Mapa miniatura" />}
-              <p>{loc.descripcion}</p>
-            </div>
-          </Popup>
+<Popup closeOnClick={true} className="!p-0">
+  <div className="space-y-3 w-64 p-1">
+    <h2 className="text-xl font-bold text-blue-400 text-center drop-shadow-md">{loc.nombre}</h2>
+    {loc.imagenMapaMundi && (
+      <img
+        src={loc.imagenMapaMundi}
+        alt="Mapa miniatura"
+        className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
+      />
+    )}
+    <p className="text-gray-300 text-sm leading-snug">{loc.descripcion}</p>
+  </div>
+</Popup>
         </Marker>
       );
     });
@@ -470,6 +502,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
               esNarrador={esNarrador}
               setLocaciones={setLocaciones}
               abrirModal={abrirModal}
+              usuario={usuario}
             />
             {esNarrador && <RightClickMenu abrirModal={abrirModal} />}
           </MapContainer>
