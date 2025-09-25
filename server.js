@@ -165,8 +165,6 @@ app.post("/guardarLocacionMundo", async (req, res) => {
 });
 
 
-
-// 🔹 Endpoint para actualizar coordenadas
 app.post("/actualizarCoordenadas", async (req, res) => {
   const { id, coords_x, coords_y } = req.body;
 
