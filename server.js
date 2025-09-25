@@ -5,6 +5,8 @@ import pkg from "pg";
 
 const { Pool } = pkg;
 
+
+/*
 // 🔹 Configuración de conexión a PostgreSQL
 const pool = new Pool({
   user: "postgres",
@@ -13,6 +15,21 @@ const pool = new Pool({
   password: "041183",
   port: 5432,
 });
+*/
+
+//base de datos en RENDER
+const pool = new Pool({
+  user: 'gorda',
+  host: 'dpg-d1s01g7diees73akbt00-a.oregon-postgres.render.com',
+  database: 'appbasenative',
+  password: '7p1AkuNrAUkPQpM0i75VCA5Ljx71WLRC',
+  port: 5432,
+   ssl: {
+    rejectUnauthorized: false, // Esto es clave en conexiones con Render
+  },
+});
+
+
 
 const app = express();
 const PORT = 10000; // 🚨 como pediste, puerto 10000
@@ -53,7 +70,7 @@ app.get("/", (req, res) => {
 app.get("/consumirLocaciones", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM locaciones;");
-    console.log("Lo que me trae de bbdd", result.rows);
+    //console.log("Lo que me trae de bbdd", result.rows);
 
     // Si no hay filas, devolver array vacío
     res.json(result.rows || []);
@@ -80,7 +97,7 @@ app.post("/guardarLocacion", async (req, res) => {
     iconoUrl
   } = req.body;
   
-  console.log("Lo que viene del cliente: ", req.body);
+  //console.log("Lo que viene del cliente: ", req.body);
 
   try {
     // 1️⃣ Insertamos la locación
@@ -262,6 +279,107 @@ app.put("/actualizarMundo/:id", async (req, res) => {
     res.status(500).json({ ok: false, msg: "Error interno del servidor" });
   }
 });
+
+
+
+
+
+// Crear una nueva info
+app.post("/guardarInfo", async (req, res) => {
+  const { locacion_id_fk, titulo, descripcion, imagenUrl } = req.body;
+
+  if (!locacion_id_fk || !titulo) {
+    return res.status(400).json({ ok: false, error: "Faltan campos obligatorios" });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO infos (locacion_id_fk, titulo, descripcion, "imagenUrl") 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [locacion_id_fk, titulo, descripcion || null, imagenUrl || null]
+    );
+
+    res.json({ ok: true, info: result.rows[0] });
+  } catch (error) {
+    console.error("Error al insertar info:", error.message);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+
+// 🔹 Obtener secciones de una locación
+app.get("/obtenerInfo/:locacionId", async (req, res) => {
+  const { locacionId } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT id, titulo, descripcion, "imagenUrl" 
+       FROM infos 
+       WHERE locacion_id_fk = $1
+       ORDER BY id ASC`,
+      [locacionId]
+    );
+
+    res.json({ ok: true, info: result.rows });
+  } catch (error) {
+    console.error("Error obteniendo secciones:", error);
+    res.status(500).json({ ok: false, error: "Error al obtener secciones" });
+  }
+});
+
+
+
+// DELETE sección por ID
+app.delete("/eliminarInfo/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      "DELETE FROM infos WHERE id = $1 RETURNING *",
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ ok: false, error: "Sección no encontrada" });
+    }
+
+    res.json({ ok: true, info: result.rows[0] });
+  } catch (error) {
+    console.error("Error eliminando sección:", error.message);
+    res.status(500).json({ ok: false, error: "Error del servidor" });
+  }
+});
+
+
+
+
+// PUT para actualizar una sección por ID
+app.put("/actualizarInfo/:id", async (req, res) => {
+  const { id } = req.params;
+  const { titulo, descripcion, imagenUrl } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE infos
+       SET titulo = $1,
+           descripcion = $2,
+           "imagenUrl" = $3
+       WHERE id = $4
+       RETURNING *`,
+      [titulo, descripcion, imagenUrl, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ ok: false, error: "Sección no encontrada" });
+    }
+
+    res.json({ ok: true, info: result.rows[0] });
+  } catch (error) {
+    console.error("Error actualizando sección:", error.message);
+    res.status(500).json({ ok: false, error: "Error del servidor" });
+  }
+});
+
 
 // 🔹 Levantar servidor
 app.listen(PORT, () => {

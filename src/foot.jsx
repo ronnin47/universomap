@@ -7,7 +7,7 @@ export const Foot = () => {
       {/* Marca + derechos */}
       <aside className="flex flex-col items-start gap-1">
         <span className="text-lg font-bold text-purple-400 hover:text-purple-300 transition-colors duration-300">
-          🌌 Universo Celeste
+            ZNK- ゼピロの思い出
         </span>
         <p className="text-sm opacity-70">© 2025 - Todos los derechos reservados</p>
         <p className="text-xs opacity-80">

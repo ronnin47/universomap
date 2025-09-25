@@ -5,6 +5,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 
+import { API_URL } from "./config";
+
+import { Info } from "./info";
+
 // 🔹 Límites del mapa
 const bounds = [
   [0, 0],
@@ -13,6 +17,7 @@ const bounds = [
 
 const iconosBase = {
   // 🌍 Mundo / Lugares / Mapas
+  puntero:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRDGcwDvbcWZRhzdtg8mpIpckeykcpj84n9w&s",
   mundo: "🌍",
   personaje: "🧑",
   brujula: "🧭",
@@ -141,6 +146,9 @@ const iconosBase = {
   nueve: "9️⃣",
 };
 
+
+
+
 // 🔹 Función para crear icono desde URL o emoji
 const crearIcono = (iconoUrl, tipo, tamano = 32) => {
   const icono = iconoUrl || iconosBase[tipo] || "❓";
@@ -203,7 +211,7 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
               );
               try {
                 const response = await axios.post(
-                  "http://localhost:10000/actualizarCoordenadas",
+                  `${API_URL}/actualizarCoordenadas`,
                   { id: loc.id, coords_x: lng, coords_y: lat }
                 );
                 if (!response.data.ok) console.log("Error al actualizar coordenadas:", response.data.error);
@@ -214,7 +222,10 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
           },
          
             dblclick: () => {
-              if (loc.tipo !== "personaje") {
+              if (loc.tipo == "personaje") {
+                navigate(`/personaje/${loc.id}`);
+                console.log("Pao por personaje antes de salir")
+              }else{
                 navigate(`/mapaMundo/${loc.id}`);
               }
             }
@@ -225,19 +236,23 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
         }}
         _locacion={loc}
       >
-       <Popup closeOnClick={true} className="!p-0">
-  <div className="space-y-3 w-64 p-1">
-    <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
-    {loc.imagenMapaMundi && (
-      <img
+       <Popup 
+       closeOnClick={true} 
+       className="!p-0">
+       <div className="space-y-3 w-64 p-1">
+       <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
+       {loc.imagenMapaMundi && (
+       <img
         src={loc.imagenMapaMundi}
         alt="Mapa miniatura"
         className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
-      />
-    )}
-    <p className="text-gray-300 text-sm leading-snug">{loc.descripcion}</p>
-  </div>
-</Popup>
+       />
+       )}
+       <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
+          {loc.descripcion}
+       </p>
+       </div>
+       </Popup>
       </Marker>
     );
   });
@@ -256,11 +271,16 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
   const { id } = useParams();
   const navigate = useNavigate();
   const mundo = locaciones.find((l) => l.id === parseInt(id)) || {};
-
+console.log("llego a copmponenete mapa mundo")
   const locacionesDelMundo = useMemo(() => 
     locaciones.filter(l => l.capa === 1 && l.mundo === mundo.id),
     [locaciones, mundo.id]
   );
+
+
+
+  const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
+
 
  useEffect(() => {
   const agregarAlHistorial = () => {
@@ -273,6 +293,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
   agregarAlHistorial();
 }, [id, setHistorialMapas]);
 
+const [modalInfoVisible, setModalInfoVisible] = useState(false);
 
 
 // Cada vez que cambie `mundo`, reiniciamos `camposMundo` con sus valores
@@ -359,7 +380,7 @@ useEffect(() => {
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "" });
+    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -370,17 +391,17 @@ useEffect(() => {
       nombre: formData.nombre,
       tipo: formData.tipo,
       descripcion: formData.descripcion,
-      imagenMapaMundi: formData.imagenMapaMundi,
+      imagenMapaMundi: formData.imagenMapaMundi || imagenBase,
       iconoUrl: formData.iconoUrl || null,
       coords_x: posicionClick[1],
       coords_y: posicionClick[0],
-      tamano: formData.tamano,
+      tamano: Number(formData.tamano) || 25,
       icono: iconosBase[formData.tipo] || "❓",
       capa: 1,
       mundo: mundo.id,
     };
     try {
-      const response = await axios.post("http://localhost:10000/guardarLocacionMundo", nuevaLocacion);
+      const response = await axios.post(`${API_URL}/guardarLocacionMundo`, nuevaLocacion);
       if (response.data.ok) {
         const locGuardada = response.data.locacion;
         setLocaciones(prev => [...prev, locGuardada]);
@@ -411,7 +432,7 @@ useEffect(() => {
   const eliminarLocacion = async () => {
     if (!locacionSeleccionada) return;
     try {
-      await axios.delete(`http://localhost:10000/eliminarLocacion/${locacionSeleccionada.id}`);
+      await axios.delete(`${API_URL}/eliminarLocacion/${locacionSeleccionada.id}`);
       setLocaciones(prev => prev.filter(l => l.id !== locacionSeleccionada.id));
       setModalEliminarVisible(false);
     } catch (error) {
@@ -420,8 +441,6 @@ useEffect(() => {
   };
 
   if (!mundo.id) return <div>Mundo no encontrado</div>;
-
-
 
 
 
@@ -465,7 +484,10 @@ useEffect(() => {
   </div>
 
   {/* Descripción debajo */}
-  <p className="mt-1 text-gray-100 text-sm leading-snug">{mundo.descripcion}</p>
+  <div className="w-8/9">
+      <p className="mt-3 text-gray-100 text-sm leading-snug">{mundo.descripcion}</p>
+  </div>
+  
 </div>
 
      
@@ -528,7 +550,9 @@ useEffect(() => {
 
       
 {/* Contenedor para centrar */}
-<div className="flex justify-center mb-4 mt-6">
+
+{usuario==="narrador" ?(
+  <div className="flex justify-end mb-4 mt-6">
   {/* Botón para abrir modal */}
   <button
     className="w-40 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
@@ -537,6 +561,9 @@ useEffect(() => {
     Editar Mapa
   </button>
 </div>
+
+):(<></>)}
+
 
 {/* Modal */}
 {mostrarModalMundo && (
@@ -641,7 +668,7 @@ useEffect(() => {
           onClick={async () => {
             try {
               const response = await axios.put(
-                `http://localhost:10000/actualizarMundo/${mundo.id}`,
+                `${API_URL}/actualizarMundo/${mundo.id}`,
                 {
                   nombre: camposMundo.nombre || mundo.nombre,
                   descripcion: camposMundo.descripcion || mundo.descripcion,
@@ -677,90 +704,118 @@ useEffect(() => {
 
     
 
-      {/* Modal creación locación */}
-      {modalVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[9999]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-96 overflow-auto">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Nueva Locación</h2>
-            <input
-              type="text"
-              placeholder="URL de la imagen del mapa"
-              className="input input-bordered w-full mb-3"
-              value={formData.imagenMapaMundi}
-              onChange={(e) =>
-                setFormData({ ...formData, imagenMapaMundi: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Nombre"
-              className="input input-bordered w-full mb-3"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-            />
-            <select
-              className="select select-bordered w-full mb-3"
-              value={formData.tipo}
-              onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-            >
-              {Object.keys(iconosBase).map((tipo) => (
-                <option key={tipo} value={tipo}>{tipo}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="URL del icono (opcional)"
-              className="input input-bordered w-full mb-3"
-              value={formData.iconoUrl}
-              onChange={(e) => setFormData({ ...formData, iconoUrl: e.target.value })}
-            />
-            <select
-              className="select select-bordered w-full mb-3"
-              value={formData.tamano || ""}
-              onChange={(e) => setFormData({ ...formData, tamano: Number(e.target.value) })}
-            >
-              <option value="" disabled>Selecciona tamaño...</option>
-              <option value="5">Diminuto</option>
-              <option value="15">Pequeño</option>
-              <option value="25">Mediano</option>
-              <option value="50">Grande</option>
-              <option value="75">Enorme</option>
-              <option value="100">Descomunal</option>
-            </select>
-            <textarea
-              placeholder="Descripción"
-              className="textarea textarea-bordered w-full mb-4"
-              value={formData.descripcion}
-              onChange={(e) =>
-                setFormData({ ...formData, descripcion: e.target.value })
-              }
-            />
-            <div className="flex justify-end gap-2">
-              <button className="btn btn-primary" onClick={guardarLocacionMundo}>Guardar</button>
-              <button className="btn btn-ghost" onClick={() => setModalVisible(false)}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
+{/* Modal creación locación */}
+{modalVisible && (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-800/70 z-[9999]">
+    <div className="bg-gray-900 rounded-xl shadow-xl p-6 w-96 overflow-auto">
+      <h2 className="text-2xl font-bold mb-4 text-white">Nueva Locación</h2>
 
-      {/* Modal eliminar locación */}
-      {modalEliminarVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-200/70 z-[1002]">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-80">
-            <h2 className="text-xl font-bold mb-4">Eliminar Locación</h2>
-            <p>¿Seguro que quieres eliminar <strong>{locacionSeleccionada?.nombre}</strong>?</p>
-            <div className="flex justify-end gap-2 mt-4">
-              <button className="btn btn-error" onClick={eliminarLocacion}>Eliminar</button>
-              <button className="btn btn-ghost" onClick={() => setModalEliminarVisible(false)}>Cancelar</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <input
+        type="text"
+        placeholder="URL de la imagen del mapa"
+        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.imagenMapaMundi}
+        onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+      />
+
+      <input
+        type="text"
+        placeholder="Nombre"
+        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.nombre}
+        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+      />
+
+      <select
+        className="select select-bordered w-full bg-gray-700 text-white border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.tipo}
+        onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+      >
+        {Object.keys(iconosBase).map((tipo) => (
+          <option key={tipo} value={tipo}>{tipo}</option>
+        ))}
+      </select>
+
+      <input
+        type="text"
+        placeholder="URL del icono (opcional)"
+        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.iconoUrl}
+        onChange={(e) => setFormData({ ...formData, iconoUrl: e.target.value })}
+      />
+
+      <select
+        className="select select-bordered w-full bg-gray-700 text-white border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.tamano || ""}
+        onChange={(e) => setFormData({ ...formData, tamano: Number(e.target.value) })}
+      >
+        <option value="" disabled>Selecciona tamaño...</option>
+        <option value="5">Diminuto</option>
+        <option value="15">Pequeño</option>
+        <option value="25">Mediano</option>
+        <option value="50">Grande</option>
+        <option value="75">Enorme</option>
+        <option value="100">Descomunal</option>
+      </select>
+
+      <textarea
+        placeholder="Descripción"
+        className="textarea textarea-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-4"
+        value={formData.descripcion}
+        onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+      />
+
+      <div className="flex justify-end gap-2">
+        <button
+          className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+          onClick={guardarLocacionMundo}
+        >
+          Guardar
+        </button>
+        <button
+          className="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+          onClick={() => setModalVisible(false)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* Modal eliminar locación */}
+{modalEliminarVisible && (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-800/70 z-[1002]">
+    <div className="bg-gray-900 rounded-xl shadow-xl p-6 w-80 overflow-auto">
+      <h2 className="text-xl font-bold mb-4 text-red-600">Eliminar Locación</h2>
+      <p className="text-white">
+        ¿Seguro que quieres eliminar <strong>{locacionSeleccionada?.nombre}</strong>?
+      </p>
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+          onClick={eliminarLocacion}
+        >
+          Eliminar
+        </button>
+        <button
+          className="px-4 py-2 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+          onClick={() => setModalEliminarVisible(false)}
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
 
-      
-
+<Info 
+locacionId={mundo.id}
+usuario={usuario}
+/>
+   
 
 
     </div>

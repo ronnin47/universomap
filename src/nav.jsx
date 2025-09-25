@@ -13,7 +13,7 @@ export const Nav = () => {
           to="/" 
           className="text-2xl md:text-3xl font-extrabold text-purple-400 hover:text-purple-300 hover:drop-shadow-2xl transition-all duration-300 truncate"
         >
-         Universo Celeste
+        ZNK- ゼピロの思い出
         </Link>
       </div>
 
