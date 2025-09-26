@@ -66,10 +66,7 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 
-// 🔹 Ejemplo de endpoint simple
-app.get("/", (req, res) => {
-  res.send("🚀 Servidor funcionando en puerto 10000");
-});
+
 
 
 // 🔹 Nuevo endpoint: traer todos los personajes
@@ -393,6 +390,7 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);
 });
