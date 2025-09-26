@@ -18,7 +18,7 @@ export const Info = ({ locacionId, usuario }) => {
   const [imagenModal, setImagenModal] = useState(null); // Lightbox
   const [editandoSeccion, setEditandoSeccion] = useState(null); // Para editar
 
-  console.log("locacion id ", locacionId);
+ 
 
   // Cargar secciones existentes
   useEffect(() => {
@@ -155,12 +155,12 @@ const handleEliminar = async (id) => {
   </h1>
 
   {usuario === "narrador" && (
-    <button
-      className="px-4 py-2 w-40 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
-      onClick={() => abrirModal()}
-    >
-      + Sección
-    </button>
+   <button
+  className="px-2 py-1.5 w-28 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-md shadow-md hover:scale-105 transform transition duration-300"
+  onClick={() => abrirModal()}
+>
+  + Sección
+</button>
   )}
 </div>
 

@@ -97,7 +97,8 @@ app.post("/guardarLocacion", async (req, res) => {
     tamano,
     icono,
     capa,
-    iconoUrl
+    iconoUrl,
+    imagenPre,
   } = req.body;
   
   //console.log("Lo que viene del cliente: ", req.body);
@@ -106,11 +107,11 @@ app.post("/guardarLocacion", async (req, res) => {
     // 1️⃣ Insertamos la locación
     const queryInsert = `
       INSERT INTO locaciones
-      (nombre, tipo, descripcion, "imagenMapaMundi", coords_x, coords_y, tamano, icono, capa,"iconoUrl")
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      (nombre, tipo, descripcion, "imagenMapaMundi", coords_x, coords_y, tamano, icono, capa,"iconoUrl", "imagenPre")
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *;
     `;
-    const values = [nombre, tipo, descripcion, imagenMapaMundi, coords_x, coords_y, tamano, icono, capa,iconoUrl];
+    const values = [nombre, tipo, descripcion, imagenMapaMundi, coords_x, coords_y, tamano, icono, capa,iconoUrl,imagenPre];
     const resultInsert = await pool.query(queryInsert, values);
     const nuevaLocacion = resultInsert.rows[0];
 
@@ -144,6 +145,7 @@ app.post("/guardarLocacionMundo", async (req, res) => {
     icono,
     capa,
     mundo,
+    imagenPre,
   } = req.body;
 
   console.log("Lo que viene del cliente: ", req.body);
@@ -152,11 +154,11 @@ app.post("/guardarLocacionMundo", async (req, res) => {
     // 1️⃣ Insertamos la locación directamente con el campo mundo
     const queryInsert = `
       INSERT INTO locaciones
-      (nombre, tipo, descripcion, "imagenMapaMundi","iconoUrl",coords_x, coords_y, tamano, icono, capa, mundo)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, $10,$11)
+      (nombre, tipo, descripcion, "imagenMapaMundi","iconoUrl",coords_x, coords_y, tamano, icono, capa, mundo,"imagenPre")
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, $10,$11,$12)
       RETURNING *;
     `;
-    const values = [nombre, tipo, descripcion, imagenMapaMundi,iconoUrl, coords_x, coords_y, tamano, icono, capa, mundo];
+    const values = [nombre, tipo, descripcion, imagenMapaMundi,iconoUrl, coords_x, coords_y, tamano, icono, capa, mundo,imagenPre];
     const resultInsert = await pool.query(queryInsert, values);
     const nuevaLocacion = resultInsert.rows[0];
 
@@ -236,6 +238,7 @@ app.put("/actualizarMundo/:id", async (req, res) => {
     coords_x,
     coords_y,
     capa,
+    imagenPre,
   } = req.body;
 
   try {
@@ -250,8 +253,9 @@ app.put("/actualizarMundo/:id", async (req, res) => {
         tamano = $6,
         coords_x = $7,
         coords_y = $8,
-        capa = $9
-      WHERE id = $10
+        capa = $9,
+        "imagenPre"=$10
+      WHERE id = $11
       RETURNING *;
     `;
 
@@ -265,6 +269,7 @@ app.put("/actualizarMundo/:id", async (req, res) => {
       coords_x,
       coords_y,
       capa,
+      imagenPre,
       id,
     ];
 

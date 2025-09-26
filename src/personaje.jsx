@@ -20,7 +20,7 @@ export const Personaje = ({ usuario, locaciones, setLocaciones,historialMapas,se
   
     const mundo = locaciones.find((l) => l.id === parseInt(id)) || {};
 
-    console.log("llego a componente personaje")
+   
 const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
 
   
@@ -57,6 +57,7 @@ useEffect(() => {
       capa: mundo.capa || 0,
       x: mundo.coords_x || 0,
       y: mundo.coords_y || 0,
+      imagenPre:mundo.imagenPre,
     });
   }
 }, [mundo]);
@@ -124,11 +125,12 @@ useEffect(() => {
     imagenMapaMundi: "",
     tamano: "",
     iconoUrl: "",
+    imagenPre:"",
   });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "" });
+    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -147,6 +149,7 @@ useEffect(() => {
       icono: iconosBase[formData.tipo] || "❓",
       capa: 1,
       mundo: mundo.id,
+      imagenPre:formData.imagenPre || imagenBase,
     };
 
 
@@ -214,9 +217,9 @@ useEffect(() => {
     <button
       onClick={irAtras}
       className="
-        flex items-center gap-2 px-4 py-1.5
-        bg-blue-600 text-white font-medium rounded-lg
-        shadow-md hover:bg-blue-700 hover:shadow-lg
+        flex items-center gap-1 px-2 py-1
+        bg-blue-600 text-white font-medium rounded-md
+        shadow-md hover:bg-blue-700 hover:shadow-md
         transition-all duration-200
       "
     >
@@ -244,8 +247,8 @@ useEffect(() => {
 <div className="w-full flex gap-5 items-start p-4 bg-gray-800 rounded-2xl shadow-md">
   {/* Imagen a la izquierda */}
   <div className="flex-shrink-0 w-64 h-64 bg-gray-700 rounded-xl overflow-hidden flex items-center justify-center">
-    {mundo.iconoUrl ? (
-      <img src={mundo.iconoUrl} alt={mundo.nombre} className="w-full h-full object-cover" />
+    {mundo.imagenPre || mundo.iconoUrl ? (
+      <img src={mundo.imagenPre || mundo.iconoUrl} alt={mundo.nombre} className="w-full h-full object-cover" />
     ) : (
       <span className="text-8xl">{mundo.icono || "🌍"}</span>
     )}
@@ -274,10 +277,10 @@ useEffect(() => {
   <div className="flex justify-end mb-4 mt-6">
   {/* Botón para abrir modal */}
   <button
-    className="w-40 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+     className="px-2 py-1.5 w-28 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-md shadow-md hover:scale-105 transform transition duration-300"
     onClick={() => setMostrarModalMundo(true)}
   >
-    Editar Mapa
+    Editar PJ
   </button>
 </div>
 
@@ -305,7 +308,7 @@ useEffect(() => {
 
       {/* Formulario */}
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold text-white mb-3">Editar Mapa</h2>
+        <h2 className="text-2xl font-bold text-white mb-3">Editar Personaje</h2>
 
         <input
           type="text"
@@ -322,12 +325,24 @@ useEffect(() => {
           onChange={(e) => setCamposMundo({ ...camposMundo, descripcion: e.target.value })}
         />
 
-        <input
+{/*
+
+ <input
           type="text"
           placeholder="URL de imagen presentacion en mapa"
           className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
           value={camposMundo.imagenMapa ?? mundo.imagenMapaMundi}
           onChange={(e) => setCamposMundo({ ...camposMundo, imagenMapa: e.target.value })}
+        />
+ */}
+       
+
+         <input
+          type="text"
+          placeholder="URL de imagen presentacion en mapa"
+          className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
+          value={camposMundo.imagenPre ?? mundo.imagenPre}
+          onChange={(e) => setCamposMundo({ ...camposMundo, imagenPre: e.target.value })}
         />
 
       
@@ -385,6 +400,7 @@ useEffect(() => {
                   coords_x: camposMundo.x || mundo.coords_x,
                   coords_y: camposMundo.y || mundo.coords_y,
                   capa: camposMundo.capa || mundo.capa,
+                  imagenPre:camposMundo.imagenPre || mundo.imagenPre,
                 }
               );
 

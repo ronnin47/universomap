@@ -7,11 +7,7 @@ import axios from "axios";
 import { API_URL } from "./config";
 
 
-const imagenMapa =
-  //"https://e0.pxfuel.com/wallpapers/879/583/desktop-wallpaper-pastel-plain-light-blue-background-light-blue-pastel.jpg";
-//"https://cdn.pixabay.com/photo/2019/07/26/14/50/heavenly-4364897_1280.jpg"
-//"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQm6LNylOFtL2XYb1JYsJvFN8qfhGVDVJ1qaA&s"
-"https://img.freepik.com/foto-gratis/nubes-al-estilo-anime_23-2151071684.jpg?semt=ais_incoming&w=740&q=80"
+const imagenMapa ="https://img.freepik.com/foto-gratis/nubes-al-estilo-anime_23-2151071684.jpg?semt=ais_incoming&w=740&q=80"
 
 
 const bounds = [
@@ -25,6 +21,8 @@ const iconosBase = {
    puntero:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRDGcwDvbcWZRhzdtg8mpIpckeykcpj84n9w&s",
   mundo: "https://res.cloudinary.com/dzul1hatw/image/upload/v1758479696/mundoA_mawo4o.svg",
   personaje: "🧑",
+  mitama:"/mitamaDorada.svg",
+  posada: "🛏️",
   brujula: "🧭",
   montaña: "⛰️",
   volcán: "🌋",
@@ -47,7 +45,6 @@ const iconosBase = {
   templo: "⛩️",
   iglesia: "⛪",
   academia: "🎓",
-  posada: "🛏️",
   mercado: "🏪",
   torre: "🗼",
   fábrica: "🏭",
@@ -377,9 +374,9 @@ function EscalarIconos({ usuario,locaciones, posiciones, setPosiciones, esNarrad
 <Popup closeOnClick={true} className="!p-0">
   <div className="space-y-3 w-64 p-1">
     <h2 className="text-xl font-bold text-blue-400 text-center drop-shadow-md">{loc.nombre}</h2>
-    {loc.imagenMapaMundi && (
+    {(loc.imagenPre || loc.imagenMapaMundi) && (
       <img
-        src={loc.imagenMapaMundi}
+        src={loc.imagenPre || loc.imagenMapaMundi}
         alt="Mapa miniatura"
         className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
       />
@@ -415,6 +412,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
     imagenMapaMundi: "",
     iconoUrl: "",
     tamano: 15,
+    imagenPre: "",
   });
 
   const navigate = useNavigate();
@@ -444,6 +442,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
         imagenMapaMundi: "",
         iconoUrl: "",
         tamano: 15,
+        imagenPre:"",
       });
     }
   };
@@ -460,6 +459,7 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
       coords_y: modalData.latlng.lat,
       tamano: formData.tamano,
       capa: 0,
+      imagenPre: formData.imagenPre || imagenBase,
     };
     try {
       const response = await axios.post(`${API_URL}/guardarLocacion`, nuevaLocacion);
@@ -520,7 +520,10 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
             maxBounds={bounds}
             maxBoundsViscosity={1}
           >
-            <ImageOverlay url={imagenMapa} bounds={bounds} />
+            <ImageOverlay 
+            url={imagenMapa} 
+            bounds={bounds}
+            />
 
 
            
@@ -557,9 +560,10 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
                 }}
               >
                 <img
-                  src={loc.imagenMapaMundi || "/placeholder-map.png"}
+                  src={loc.imagenMapaMundi || imagenBase}
                   alt={loc.nombre}
                   className="w-24 h-16 object-cover rounded-lg border border-white/50"
+                  style={{border:"0.5px solid gray"}}
                 />
                 <span className="text-white text-sm block mt-1">{loc.nombre}</span>
               </div>
@@ -579,6 +583,14 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
         className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
         value={formData.imagenMapaMundi}
         onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+      />
+
+       <input
+        type="text"
+        placeholder="URL de presentacion"
+        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.imagenPre}
+        onChange={(e) => setFormData({ ...formData, imagenPre: e.target.value })}
       />
 
       <input

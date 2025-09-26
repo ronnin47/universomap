@@ -20,6 +20,7 @@ const iconosBase = {
   puntero:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRDGcwDvbcWZRhzdtg8mpIpckeykcpj84n9w&s",
   mundo: "🌍",
   personaje: "🧑",
+  posada: "🛏️",
   brujula: "🧭",
   montaña: "⛰️",
   volcán: "🌋",
@@ -41,7 +42,7 @@ const iconosBase = {
   templo: "⛩️",
   iglesia: "⛪",
   academia: "🎓",
-  posada: "🛏️",
+ 
   mercado: "🏪",
   torre: "🗼",
   fábrica: "🏭",
@@ -241,9 +242,9 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
        className="!p-0">
        <div className="space-y-3 w-64 p-1">
        <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
-       {loc.imagenMapaMundi && (
+       {(loc.imagenPre || loc.imagenMapaMundi) && (
        <img
-        src={loc.imagenMapaMundi}
+        src={loc.imagenPre || loc.imagenMapaMundi}
         alt="Mapa miniatura"
         className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
        />
@@ -271,7 +272,7 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
   const { id } = useParams();
   const navigate = useNavigate();
   const mundo = locaciones.find((l) => l.id === parseInt(id)) || {};
-console.log("llego a copmponenete mapa mundo")
+
   const locacionesDelMundo = useMemo(() => 
     locaciones.filter(l => l.capa === 1 && l.mundo === mundo.id),
     [locaciones, mundo.id]
@@ -309,6 +310,7 @@ useEffect(() => {
       capa: mundo.capa || 0,
       x: mundo.coords_x || 0,
       y: mundo.coords_y || 0,
+      imagenPre:mundo.imagenPre || "",
     });
   }
 }, [mundo]);
@@ -376,11 +378,12 @@ useEffect(() => {
     imagenMapaMundi: "",
     tamano: "",
     iconoUrl: "",
+    imagenPre:"",
   });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "" });
+    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"", });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -399,6 +402,7 @@ useEffect(() => {
       icono: iconosBase[formData.tipo] || "❓",
       capa: 1,
       mundo: mundo.id,
+      imagenPre:formData.imagenPre || imagenBase
     };
     try {
       const response = await axios.post(`${API_URL}/guardarLocacionMundo`, nuevaLocacion);
@@ -463,9 +467,9 @@ useEffect(() => {
     <button
       onClick={irAtras}
       className="
-        flex items-center gap-2 px-4 py-1.5
-        bg-blue-600 text-white font-medium rounded-lg
-        shadow-md hover:bg-blue-700 hover:shadow-lg
+        flex items-center gap-1 px-2 py-1
+        bg-blue-600 text-white font-medium rounded-md
+        shadow-md hover:bg-blue-700 hover:shadow-md
         transition-all duration-200
       "
     >
@@ -475,74 +479,84 @@ useEffect(() => {
         viewBox="0 0 24 24"
         strokeWidth={2}
         stroke="currentColor"
-        className="w-4 h-4"
+        className="w-3 h-3"
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
       <span>Volver</span>
     </button>
+
+  
   </div>
 
-  {/* Descripción debajo */}
-  <div className="w-8/9">
-      <p className="mt-3 text-gray-100 text-sm leading-snug">{mundo.descripcion}</p>
-  </div>
   
 </div>
 
      
       
 
-      <div className="w-full h-[60vh] p-1 flex gap-5">
-        {/* 🔹 Mapa principal */}
-        <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
-          <MapContainer
-            center={[bounds[1][0] / 2, bounds[1][1] / 2]}
-            zoom={1}
-            minZoom={1}
-            maxZoom={5}
-            scrollWheelZoom
-            crs={L.CRS.Simple}
-            className="w-full h-[60vh] rounded-2xl"
-            maxBounds={bounds}   
-            maxBoundsViscosity={1} 
-          >
-            <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
-            <EscalarIconos
-              locaciones={locacionesDelMundo}
-              posiciones={posiciones}
-              setPosiciones={setPosiciones}
-              usuario={usuario}
-              setLocacionesGlobal={setLocaciones}
-              abrirModalEliminar={abrirModalEliminar}
-            />
-            {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
-          </MapContainer>
-        </div>
 
-        {/* 🔹 Panel lateral con mini mapas */}
-         <div className="flex flex-col gap-3 w-32 overflow-y-auto  p-3">
-          {locacionesCapa0.filter((loc) => loc.tipo !== "personaje").map((loc) => (
-            <div
-              key={loc.id}
+  {/* 🔹 Contenedor principal: mapa y mini-mapas */}
+  <div className="w-full h-[60vh] p-1 flex gap-5">
+    {/* Mapa principal */}
+    <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl  overflow-hidden">
+      <MapContainer
+        center={[bounds[1][0] / 2, bounds[1][1] / 2]}
+        zoom={1}
+        minZoom={1}
+        maxZoom={5}
+        scrollWheelZoom
+        crs={L.CRS.Simple}
+        className="w-full h-full rounded-2xl"
+        maxBounds={bounds}
+        maxBoundsViscosity={1}
+        
+      >
+        <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
+        <EscalarIconos
+          locaciones={locacionesDelMundo}
+          posiciones={posiciones}
+          setPosiciones={setPosiciones}
+          usuario={usuario}
+          setLocacionesGlobal={setLocaciones}
+          abrirModalEliminar={abrirModalEliminar}
+        />
+        {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
+      </MapContainer>
+    </div>
+
+    {/* Panel lateral mini-mapas */}
+    <div className="flex flex-col gap-3 w-32 overflow-y-auto p-3 h-[60vh]">
+      {locacionesCapa0
+        .filter((loc) => loc.tipo !== "personaje")
+        .map((loc) => (
+          <div
+            key={loc.id}
             className="flex-shrink-0 cursor-pointer text-center borderHover"
-              
-                onClick={() => {
-                if (loc.tipo !== "personaje") {
-                  navigate(`/mapaMundo/${loc.id}`);
-                }
-              }}
-            >
-              <img
-                src={loc.imagenMapaMundi || "/placeholder-map.png"}
-                alt={loc.nombre}
-                className="w-24 h-16 object-cover rounded-lg border border-white/50"
-              />
-              <span className="text-white text-sm block mt-1">{loc.nombre}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+            onClick={() => {
+              if (loc.tipo !== "personaje") {
+                navigate(`/mapaMundo/${loc.id}`);
+              }
+            }}
+          >
+            <img
+              src={loc.imagenMapaMundi || imagenBase}
+              alt={loc.nombre}
+              className="w-24 h-16 object-cover rounded-lg border border-white/50"
+              style={{ border: "1px solid white" }}
+            />
+            <span className="text-white text-sm block mt-1">{loc.nombre}</span>
+          </div>
+        ))}
+    </div>
+  </div>
+
+  {/* 🔹 Descripción debajo de todo */}
+  <div className="w-8/9 mt-2 p-4">
+    <p className="text-gray-100 text-sm leading-snug">{mundo.descripcion}</p>
+  </div>
+   
+
 
 
 
@@ -555,7 +569,7 @@ useEffect(() => {
   <div className="flex justify-end mb-4 mt-6">
   {/* Botón para abrir modal */}
   <button
-    className="w-40 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+    className="px-2 py-1.5 w-28 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-md shadow-md hover:scale-105 transform transition duration-300"
     onClick={() => setMostrarModalMundo(true)}
   >
     Editar Mapa
@@ -601,6 +615,14 @@ useEffect(() => {
           className="textarea textarea-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
           value={camposMundo.descripcion ?? mundo.descripcion}
           onChange={(e) => setCamposMundo({ ...camposMundo, descripcion: e.target.value })}
+        />
+
+         <input
+          type="text"
+          placeholder="URL de imagen de presentacion"
+          className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
+          value={camposMundo.imagenPre ?? mundo.imagenPre}
+          onChange={(e) => setCamposMundo({ ...camposMundo, imagenPre: e.target.value })}
         />
 
         <input
@@ -679,6 +701,7 @@ useEffect(() => {
                   coords_x: camposMundo.x || mundo.coords_x,
                   coords_y: camposMundo.y || mundo.coords_y,
                   capa: camposMundo.capa || mundo.capa,
+                  imagenPre: camposMundo.imagenPre || imagenBase,
                 }
               );
 
@@ -716,6 +739,14 @@ useEffect(() => {
         className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
         value={formData.imagenMapaMundi}
         onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+      />
+
+       <input
+        type="text"
+        placeholder="URL de presentacion"
+        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+        value={formData.imagenPre}
+        onChange={(e) => setFormData({ ...formData, imagenPre: e.target.value })}
       />
 
       <input

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+
+
+
 export const Nav = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -8,16 +11,36 @@ export const Nav = () => {
     <div className="relative navbar bg-gradient-to-r from-black via-gray-900 to-blue-950 shadow-2xl text-white px-4 py-4">
 
       {/* Logo */}
-      <div className="flex-1">
-        <Link 
-          to="/" 
-          className="text-2xl md:text-3xl font-extrabold text-purple-400 hover:text-purple-300 hover:drop-shadow-2xl transition-all duration-300 truncate"
-        >
-        ZNK- ゼピロの思い出
-        </Link>
+    <div className="flex-1">
+  <Link
+    to="/"
+    className="flex items-center gap-1 text-xl md:text-2xl font-extrabold text-purple-400 hover:text-purple-300 hover:drop-shadow-2xl transition-all duration-300 truncate"
+  >
+    <img src="/mitamaDorada.svg" alt="Logo" className="h-6 w-6 md:h-8 md:w-8" />
+    ZNK- ゼピロの思い出
+  </Link>
+</div>
+
+      {/*
+      
+      
+     
+      <div className="hidden md:flex flex-none gap-6">
+        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/">Inicio</Link>
+        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/pagina1">Página 1</Link>
+        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/pagina2">Página 2</Link>
       </div>
 
-      {/* Hamburger para móvil */}
+   
+      {isOpen && (
+        <div className="absolute top-full left-0 w-full bg-gradient-to-r from-black via-gray-900 to-blue-950 flex flex-col items-center gap-4 py-4 shadow-inner z-50 md:hidden">
+          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/" onClick={() => setIsOpen(false)}>Inicio</Link>
+          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/pagina1" onClick={() => setIsOpen(false)}>Página 1</Link>
+          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/pagina2" onClick={() => setIsOpen(false)}>Página 2</Link>
+        </div>
+      )}
+      
+      
       <div className="flex-none md:hidden">
         <button 
           className="btn btn-square btn-ghost"
@@ -29,22 +52,9 @@ export const Nav = () => {
         </button>
       </div>
 
-      {/* Links Desktop */}
-      <div className="hidden md:flex flex-none gap-6">
-        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/">Inicio</Link>
-        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/pagina1">Página 1</Link>
-        <Link className="text-white hover:text-purple-300 hover:scale-110 hover:drop-shadow-lg transition-all duration-300 font-semibold" to="/pagina2">Página 2</Link>
-      </div>
+      */}
 
-      {/* Links Móvil */}
-      {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-gradient-to-r from-black via-gray-900 to-blue-950 flex flex-col items-center gap-4 py-4 shadow-inner z-50 md:hidden">
-          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/" onClick={() => setIsOpen(false)}>Inicio</Link>
-          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/pagina1" onClick={() => setIsOpen(false)}>Página 1</Link>
-          <Link className="text-white text-lg hover:text-purple-300 hover:scale-105 transition-all duration-300 font-semibold" to="/pagina2" onClick={() => setIsOpen(false)}>Página 2</Link>
-        </div>
-      )}
-      
+     
     </div>
   );
 };
