@@ -384,14 +384,13 @@ app.put("/actualizarInfo/:id", async (req, res) => {
 });
 
 
-// Servir los archivos estáticos del frontend (Vite build)
+// Servir frontend Vite build
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("/*", (req, res) => {
+// Fallback para cualquier ruta que no coincida con tu API
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
-
-
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
