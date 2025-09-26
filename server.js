@@ -1,14 +1,17 @@
 // server.js
 import express from "express";
 import cors from "cors";
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 import pkg from "pg";
 
 const { Pool } = pkg;
 import path from "path";
 import { fileURLToPath } from "url";
+
 const app = express();
-
-
 // 🔹 Middlewares
 app.use(cors());
 app.use(express.json());
@@ -16,6 +19,36 @@ app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+   origin: "http://localhost:5173", // ajusta según tu front
+    methods: ["GET", "POST"]
+  }
+});
+
+
+
+/// 🔹 Socket.IO
+io.on("connection", (socket) => {
+  console.log(`Cliente conectado: ${socket.id}`);
+
+
+
+  // Escuchamos movimiento de locación (el cliente ya guardó en la DB)
+  socket.on("moverLocacion", ({ id, coords_x, coords_y }) => {
+    console.log(`Locacion ${id} movida a [${coords_x}, ${coords_y}]`);
+
+    // Reenviamos a todos los clientes menos el que emitió
+    socket.broadcast.emit("locacionMovida", { id, coords_x, coords_y });
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Cliente desconectado: ${socket.id}`);
+  });
+});
 
 
 /*
@@ -396,6 +429,7 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, "0.0.0.0", () => {
+// Usar httpServer (no app.listen)
+httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);
 });

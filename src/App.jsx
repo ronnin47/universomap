@@ -10,9 +10,12 @@ import { MapaUniverso } from "./mapaUniverso";
 import { MapaMundo } from "./mapaMundo";
 import {Personaje} from "./personaje";
 
-
+import { io } from "socket.io-client";
 import { API_URL } from "./config";
 
+
+const socket = io(API_URL); 
+//const socket = io('http://localhost:10000');
 
 import axios from "axios";
 
@@ -35,6 +38,29 @@ export const App = () => {
     };
     consumirLocaciones();
   }, []);
+
+useEffect(() => {
+    const socket = io(API_URL, {
+      transports: ["websocket"], // fuerza conexión limpia
+    });
+
+    socket.on("connect", () => {
+      console.log("✅ Conectado al backend:", socket.id);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log("❌ Error de conexión:", err.message);
+    });
+
+    socket.on("locacionMovida", (data) => {
+      console.log("📦 Locación movida recibida:", data);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
 
 
   /*

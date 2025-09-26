@@ -5,9 +5,13 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 
+import { io } from "socket.io-client";
+
 import { API_URL } from "./config";
 
 import { Info } from "./info";
+
+const socket = io(API_URL); 
 
 // 🔹 Límites del mapa
 const bounds = [
@@ -177,7 +181,7 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
 };
 
 // 🔹 Escala los íconos según zoom y agrega clic derecho para eliminar
-function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocacionesGlobal, abrirModalEliminar }) {
+function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocaciones, abrirModalEliminar }) {
   const map = useMapEvent("zoom", () => {
     const zoom = map.getZoom();
     const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
@@ -200,16 +204,23 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
       <Marker
         key={loc.id}
         position={posicion}
-        draggable={usuario === "narrador"}
+        draggable={
+          (usuario === "narrador") || 
+          (usuario !== "narrador" && loc.tipo === "personaje")
+        }
         icon={crearIcono(loc.iconoUrl, loc.tipo, loc.tamano)}
         eventHandlers={{
           dragend: async (e) => {
-            if (usuario === "narrador") {
+            if ((usuario === "narrador") || (usuario !== "narrador" && loc.tipo === "personaje")) {
               const { lat, lng } = e.target.getLatLng();
               setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
-              setLocacionesGlobal(prev =>
+              setLocaciones(prev =>
                 prev.map(m => m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m)
               );
+
+               // Emitimos al servidor
+                socket.emit("moverLocacion", { id: loc.id, coords_x: lng, coords_y: lat });
+
               try {
                 const response = await axios.post(
                   `${API_URL}/actualizarCoordenadas`,
@@ -315,7 +326,18 @@ useEffect(() => {
   }
 }, [mundo]);
 
+useEffect(() => {
+  socket.on("locacionMovida", ({ id, coords_x, coords_y }) => {
+    setPosiciones(prev => ({ ...prev, [id]: [coords_y, coords_x] }));
+    setLocaciones(prev =>
+      prev.map(m => m.id === id ? { ...m, coords_x, coords_y } : m)
+    );
+  });
 
+  return () => {
+    socket.off("locacionMovida");
+  };
+}, []);
 
  const irAtras = () => {
   setHistorialMapas(prev => {
@@ -518,7 +540,7 @@ useEffect(() => {
           posiciones={posiciones}
           setPosiciones={setPosiciones}
           usuario={usuario}
-          setLocacionesGlobal={setLocaciones}
+          setLocaciones={setLocaciones}
           abrirModalEliminar={abrirModalEliminar}
         />
         {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
@@ -686,39 +708,42 @@ useEffect(() => {
         </div>
 
         <button
-          className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
-          onClick={async () => {
-            try {
-              const response = await axios.put(
-                `${API_URL}/actualizarMundo/${mundo.id}`,
-                {
-                  nombre: camposMundo.nombre || mundo.nombre,
-                  descripcion: camposMundo.descripcion || mundo.descripcion,
-                  imagenMapaMundi: camposMundo.imagenMapa || mundo.imagenMapaMundi,
-                  tipo: camposMundo.tipo || mundo.tipo,
-                  iconoUrl: camposMundo.icono || mundo.iconoUrl,
-                  tamano: camposMundo.tamano || mundo.tamano,
-                  coords_x: camposMundo.x || mundo.coords_x,
-                  coords_y: camposMundo.y || mundo.coords_y,
-                  capa: camposMundo.capa || mundo.capa,
-                  imagenPre: camposMundo.imagenPre || imagenBase,
-                }
-              );
+  className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold rounded-lg shadow-md hover:scale-105 transform transition duration-300"
+  onClick={async () => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/actualizarMundo/${mundo.id}`,
+        {
+          nombre: camposMundo.nombre || mundo.nombre,
+          descripcion: camposMundo.descripcion || mundo.descripcion,
+          imagenMapaMundi: camposMundo.imagenMapa || mundo.imagenMapaMundi,
+          tipo: camposMundo.tipo || mundo.tipo,
+          iconoUrl: camposMundo.icono || mundo.iconoUrl,
+          tamano: camposMundo.tamano || mundo.tamano,
+          coords_x: camposMundo.x || mundo.coords_x,
+          coords_y: camposMundo.y || mundo.coords_y,
+          capa: camposMundo.capa || mundo.capa,
+          imagenPre: camposMundo.imagenPre || imagenBase,
+        }
+      );
 
-              if (response.data.ok) {
-                setLocaciones((prev) =>
-                  prev.map((m) => (m.id === mundo.id ? { ...m, ...response.data.mundo } : m))
-                );
-                //alert("Mundo actualizado correctamente");
-                setMostrarModalMundo(false);
-              }
-            } catch (error) {
-              console.log("❌ Error al actualizar mundo:", error.message);
-            }
-          }}
-        >
-          Guardar cambios
-        </button>
+      if (response.data.ok) {
+        setLocaciones((prev) =>
+          prev.map((m) =>
+            m.id === mundo.id ? { ...m, ...response.data.mundo } : m
+          )
+        );
+        setMostrarModalMundo(false); // 🔹 Cierra modal al guardar
+      } else {
+        console.log("Error al actualizar mundo:", response.data.error);
+      }
+    } catch (error) {
+      console.log("❌ Error en la actualización de mundo:", error.message);
+    }
+  }}
+>
+  Guardar cambios
+</button>
       </div>
 
     </div>
