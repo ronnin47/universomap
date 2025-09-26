@@ -387,7 +387,7 @@ app.put("/actualizarInfo/:id", async (req, res) => {
 // Servir los archivos estáticos del frontend (Vite build)
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
