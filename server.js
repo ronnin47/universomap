@@ -32,7 +32,7 @@ const pool = new Pool({
 
 
 const app = express();
-const PORT = 10000; // 🚨 como pediste, puerto 10000
+//const PORT = 10000; // 🚨 como pediste, puerto 10000
 
 // 🔹 Middlewares
 app.use(cors());
@@ -379,7 +379,7 @@ app.put("/actualizarInfo/:id", async (req, res) => {
 });
 
 
-// 🔹 Levantar servidor
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);
 });
