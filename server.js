@@ -4,6 +4,18 @@ import cors from "cors";
 import pkg from "pg";
 
 const { Pool } = pkg;
+import path from "path";
+import { fileURLToPath } from "url";
+const app = express();
+
+
+// 🔹 Middlewares
+app.use(cors());
+app.use(express.json());
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 /*
@@ -31,12 +43,6 @@ const pool = new Pool({
 
 
 
-const app = express();
-//const PORT = 10000; // 🚨 como pediste, puerto 10000
-
-// 🔹 Middlewares
-app.use(cors());
-app.use(express.json());
 
 // 🔹 Verificar conexión apenas arranca el servidor
 (async () => {
@@ -196,7 +202,7 @@ app.post("/actualizarCoordenadas", async (req, res) => {
 
 
 
-// server.js o routes/locaciones.js
+
 
 app.delete("/eliminarLocacion/:id", async (req, res) => {
   const { id } = req.params;
@@ -220,7 +226,7 @@ app.delete("/eliminarLocacion/:id", async (req, res) => {
 
 
 
-// 📌 Endpoint: actualizar un mundo
+
 app.put("/actualizarMundo/:id", async (req, res) => {
   const { id } = req.params;
   const {
@@ -277,7 +283,6 @@ app.put("/actualizarMundo/:id", async (req, res) => {
     res.status(500).json({ ok: false, msg: "Error interno del servidor" });
   }
 });
-
 
 
 
@@ -379,7 +384,16 @@ app.put("/actualizarInfo/:id", async (req, res) => {
 });
 
 
+// Servir los archivos estáticos del frontend (Vite build)
+app.use(express.static(path.join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+
+
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🌍 Servidor escuchando en http://localhost:${PORT}`);
 });
