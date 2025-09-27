@@ -7,8 +7,8 @@ import axios from "axios";
 import { API_URL } from "./config";
 
 
-const imagenMapa ="https://img.freepik.com/foto-gratis/nubes-al-estilo-anime_23-2151071684.jpg?semt=ais_incoming&w=740&q=80"
-
+///const imagenMapa ="https://img.freepik.com/foto-gratis/nubes-al-estilo-anime_23-2151071684.jpg?semt=ais_incoming&w=740&q=80"
+const imagenMapa ="https://i.pinimg.com/originals/ef/90/15/ef90155f5e5af847b7eea15e496958bd.gif"
 
 const bounds = [
   [0, 0],
