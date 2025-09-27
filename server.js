@@ -10,6 +10,8 @@ import pkg from "pg";
 const { Pool } = pkg;
 import path from "path";
 import { fileURLToPath } from "url";
+import { API_URL } from './src/config.js';
+
 
 const app = express();
 // 🔹 Middlewares
@@ -24,8 +26,10 @@ const __dirname = path.dirname(__filename);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-   origin: "http://localhost:5173", // ajusta según tu front
-    methods: ["GET", "POST"]
+   //origin: `http://localhost:5173`, // ajusta según tu front
+    
+   origin: `${ API_URL }`, 
+   methods: ["GET", "POST"]
   }
 });
 
@@ -415,6 +419,81 @@ app.put("/actualizarInfo/:id", async (req, res) => {
   } catch (error) {
     console.error("Error actualizando sección:", error.message);
     res.status(500).json({ ok: false, error: "Error del servidor" });
+  }
+});
+
+
+
+
+app.put("/actualizarMundoPersonaje/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    nombre,
+    descripcion,
+    imagenMapaMundi,
+    tipo,
+    iconoUrl,
+    tamano,
+    coords_x,
+    coords_y,
+    capa,
+    imagenPre,
+    mundo,
+  } = req.body;
+
+  try {
+    const query = `
+      UPDATE locaciones
+      SET 
+        nombre = $1,
+        descripcion = $2,
+        "imagenMapaMundi" = $3,
+        tipo = $4,
+        "iconoUrl" = $5,
+        tamano = $6,
+        coords_x = $7,
+        coords_y = $8,
+        capa = $9,
+        "imagenPre"=$10,
+        mundo = $11
+      WHERE id = $12
+      RETURNING *;
+    `;
+
+    const values = [
+      nombre,
+      descripcion,
+      imagenMapaMundi,
+      tipo,
+      iconoUrl,
+      tamano,
+      coords_x,
+      coords_y,
+      capa,
+      imagenPre,
+      mundo,
+      id,
+    ];
+
+    const result = await pool.query(query, values);
+
+
+ if (result.rows.length === 0) {
+      return res.status(404).json({ ok: false, msg: "Mundo no encontrado" });
+    }
+
+    // Emitir a todos los clientes conectados solo si se actualizó
+    io.emit("actualizarPersonajeMapa", {
+      id: result.rows[0].id,
+      coords_x: result.rows[0].coords_x,
+      coords_y: result.rows[0].coords_y,
+      mundo: result.rows[0].mundo,
+    });
+
+    res.json({ ok: true, mundo: result.rows[0] });
+  } catch (error) {
+    console.error("❌ Error al actualizar mundo:", error.message);
+    res.status(500).json({ ok: false, msg: "Error interno del servidor" });
   }
 });
 

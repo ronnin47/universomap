@@ -17,9 +17,16 @@ export const Personaje = ({ usuario, locaciones, setLocaciones,historialMapas,se
     const { id } = useParams();
   
     const navigate = useNavigate();
+
+    //console.log("Locaciones al llegar a personaje",locaciones)
   
     const mundo = locaciones.find((l) => l.id === parseInt(id)) || {};
 
+    /*console.log(`Al entrar a personaje
+      Este es el mundo del personje ${mundo}
+      y este es el id del personaje ${id}, mundo`)
+      console.log(mundo)
+*/
    
 const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
 
@@ -58,6 +65,7 @@ useEffect(() => {
       x: mundo.coords_x || 0,
       y: mundo.coords_y || 0,
       imagenPre:mundo.imagenPre,
+      mundo:mundo.mundo,
     });
   }
 }, [mundo]);
@@ -126,11 +134,12 @@ useEffect(() => {
     tamano: "",
     iconoUrl: "",
     imagenPre:"",
+    mundo:"",
   });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"" });
+    setFormData({ nombre: "", tipo: "ciudad", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"",mundo:"" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
@@ -148,7 +157,7 @@ useEffect(() => {
       tamano: formData.tamano,
       icono: iconosBase[formData.tipo] || "❓",
       capa: 1,
-      mundo: mundo.id,
+      mundo: formData.mundo,
       imagenPre:formData.imagenPre || imagenBase,
     };
 
@@ -363,6 +372,23 @@ useEffect(() => {
             onChange={(e) => setCamposMundo({ ...camposMundo, tamano: Number(e.target.value) })}
           />
 
+         <select
+  className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
+  value={camposMundo.mundo ?? mundo.mundo ?? ""}
+  onChange={(e) =>
+    setCamposMundo({ ...camposMundo, mundo: Number(e.target.value) })
+  }
+>
+  <option value="">Seleccionar mapa</option>
+  {locaciones
+    .filter((loc) => loc.tipo !== "personaje") // 👈 excluimos personajes
+    .map((loc) => (
+      <option key={loc.id} value={loc.id}>
+        {loc.nombre}
+      </option>
+    ))}
+</select>
+
          
         </div>
 
@@ -389,7 +415,7 @@ useEffect(() => {
           onClick={async () => {
             try {
               const response = await axios.put(
-                `${API_URL}/actualizarMundo/${mundo.id}`,
+                `${API_URL}/actualizarMundoPersonaje/${mundo.id}`,
                 {
                   nombre: camposMundo.nombre || mundo.nombre,
                   descripcion: camposMundo.descripcion || mundo.descripcion,
@@ -401,6 +427,7 @@ useEffect(() => {
                   coords_y: camposMundo.y || mundo.coords_y,
                   capa: camposMundo.capa || mundo.capa,
                   imagenPre:camposMundo.imagenPre || mundo.imagenPre,
+                  mundo:camposMundo.mundo || mundo.mundo,
                 }
               );
 

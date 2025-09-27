@@ -372,13 +372,13 @@ function EscalarIconos({ usuario,locaciones, posiciones, setPosiciones, esNarrad
           _locacion={loc}
         >
 <Popup closeOnClick={true} className="!p-0">
-  <div className="space-y-3 w-64 p-1">
+  <div className="space-y-3 w-48 ">
     <h2 className="text-xl font-bold text-blue-400 text-center drop-shadow-md">{loc.nombre}</h2>
     {(loc.imagenPre || loc.imagenMapaMundi) && (
       <img
         src={loc.imagenPre || loc.imagenMapaMundi}
         alt="Mapa miniatura"
-        className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
+        className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
       />
     )}
     <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">

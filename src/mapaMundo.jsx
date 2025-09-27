@@ -180,6 +180,95 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
   });
 };
 
+
+
+
+export function CuadriculaMapa({ bounds, paso = 50, visible }) {
+  const map = useMapEvent("zoom", () => {});
+  const [rectangles, setRectangles] = useState([]);
+  const [toast, setToast] = useState(null); // { x, y, left, top }
+
+  useEffect(() => {
+    if (!visible) {
+      rectangles.forEach((rect) => rect.remove());
+      setRectangles([]);
+      return;
+    }
+
+    const rects = [];
+    const [yMin, xMin] = bounds[0];
+    const [yMax, xMax] = bounds[1];
+
+    for (let y = yMin; y < yMax; y += paso) {
+      for (let x = xMin; x < xMax; x += paso) {
+        const rectBounds = [[y, x], [y + paso, x + paso]];
+const rect = L.rectangle(rectBounds, {
+  color: "#ffffff",        // borde blanco brillante
+  weight: 0.5,               // borde más grueso
+  fillColor: "#ffffff33",  // blanco semi-transparente para brillo sutil
+  fillOpacity: 0.15,       // muy transparente
+  dashArray: "3 3",        // línea punteada para efecto futurista
+}).addTo(map);
+
+
+
+        rect.on("click", (e) => {
+          // Alterna opacidad
+          rect.setStyle({ fillOpacity: rect.options.fillOpacity === 0 ? 0.2 : 0 });
+
+          // Coordenadas X,Y (centro del cuadrante)
+          const centroX = (x + (x + paso)) / 2;
+          const centroY = (y + (y + paso)) / 2;
+
+          // Convertir lat/lng a posición de pantalla
+          const point = map.latLngToContainerPoint(e.latlng);
+
+          setToast({
+            x: centroX.toFixed(0),
+            y: centroY.toFixed(0),
+            left: point.x,
+            top: point.y,
+          });
+
+          // Desaparece en 2 segundos
+          setTimeout(() => setToast(null), 2000);
+        });
+
+        rects.push(rect);
+      }
+    }
+
+    setRectangles(rects);
+
+    return () => rects.forEach((r) => r.remove());
+  }, [visible, bounds, paso, map]);
+
+  return (
+    <>
+      {toast && (
+        <div
+          style={{
+            position: "absolute",
+            left: toast.left,
+            top: toast.top,
+            transform: "translate(-50%, -100%)",
+            background: "rgba(0,0,0,0.8)",
+            color: "white",
+            padding: "6px 10px",
+            borderRadius: "6px",
+            fontFamily: "monospace",
+            pointerEvents: "none",
+            zIndex: 9999,
+          }}
+        >
+          X: {toast.x}, Y: {toast.y}
+        </div>
+      )}
+    </>
+  );
+}
+
+ 
 // 🔹 Escala los íconos según zoom y agrega clic derecho para eliminar
 function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocaciones, abrirModalEliminar }) {
   const map = useMapEvent("zoom", () => {
@@ -251,13 +340,13 @@ function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLoca
        <Popup 
        closeOnClick={true} 
        className="!p-0">
-       <div className="space-y-3 w-64 p-1">
+       <div className="space-y-3 w-48">
        <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
        {(loc.imagenPre || loc.imagenMapaMundi) && (
        <img
         src={loc.imagenPre || loc.imagenMapaMundi}
         alt="Mapa miniatura"
-        className="w-full h-32 object-cover rounded-md border border-gray-700 shadow-inner"
+        className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
        />
        )}
        <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
@@ -283,14 +372,15 @@ export const MapaMundo = ({ usuario, locaciones, setLocaciones,historialMapas,se
   const { id } = useParams();
   const navigate = useNavigate();
   const mundo = locaciones.find((l) => l.id === parseInt(id)) || {};
-
+const [mostrarCuadricula, setMostrarCuadricula] = useState(false);
   const locacionesDelMundo = useMemo(() => 
     locaciones.filter(l => l.capa === 1 && l.mundo === mundo.id),
     [locaciones, mundo.id]
   );
-
-
-
+/*
+console.log(`Estamos en el mapa:${mundo.nombre} 
+             Su id es:${mundo.id} `)
+*/
   const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
 
 
@@ -325,6 +415,21 @@ useEffect(() => {
     });
   }
 }, [mundo]);
+
+
+useEffect(() => {
+  socket.on("actualizarPersonajeMapa", ({ id, coords_x, coords_y, mundo }) => {
+    setLocaciones(prev =>
+      prev.map(m =>
+        m.id === id ? { ...m, coords_x, coords_y, mundo } : m
+      )
+    );
+    setPosiciones(prev => ({ ...prev, [id]: [coords_y, coords_x] }));
+  });
+
+  return () => socket.off("actualizarPersonajeMapa");
+}, []);
+
 
 useEffect(() => {
   socket.on("locacionMovida", ({ id, coords_x, coords_y }) => {
@@ -479,47 +584,53 @@ useEffect(() => {
 
   return (
    <div className="p-4 bg-gradient-to-b from-gray-600 via-gray-900 to-black h-screen flex flex-col">
-  <div className="mb-3">
-  {/* Encabezado con título y botón */}
+
+
+   
+<div className="mb-3">
+  {/* Encabezado con título y botones */}
   <div className="flex justify-between items-center">
+    {/* Título del mundo */}
     <h1 className="text-2xl font-bold text-white tracking-tight">
       {mundo.nombre}
     </h1>
 
-    <button
-      onClick={irAtras}
-      className="
-        flex items-center gap-1 px-2 py-1
-        bg-blue-600 text-white font-medium rounded-md
-        shadow-md hover:bg-blue-700 hover:shadow-md
-        transition-all duration-200
-      "
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={2}
-        stroke="currentColor"
-        className="w-3 h-3"
+    {/* Contenedor de botones */}
+    <div className="flex items-center gap-2">
+      {/* Botón Mostrar/Ocultar cuadrícula */}
+      <button
+        className="px-3 py-1.5 text-sm font-medium text-white rounded-md border border-white/50 bg-transparent hover:bg-white/10 transition-all duration-300"
+        onClick={() => setMostrarCuadricula(prev => !prev)}
       >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-      </svg>
-      <span>Volver</span>
-    </button>
+        {mostrarCuadricula ? "Ocultar cuadrícula" : "Mostrar cuadrícula"}
+      </button>
 
-  
+      {/* Botón Volver */}
+      <button
+        onClick={irAtras}
+        className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white font-medium rounded-md shadow-md hover:bg-blue-700 hover:shadow-md transition-all duration-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-3 h-3"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        <span>Volver</span>
+      </button>
+    </div>
   </div>
-
-  
 </div>
-
      
       
 
 
   {/* 🔹 Contenedor principal: mapa y mini-mapas */}
-  <div className="w-full h-[60vh] p-1 flex gap-5">
+  <div className="w-full h-[60vh] p-1 flex gap-5" >
     {/* Mapa principal */}
     <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl  overflow-hidden">
       <MapContainer
@@ -532,9 +643,14 @@ useEffect(() => {
         className="w-full h-full rounded-2xl"
         maxBounds={bounds}
         maxBoundsViscosity={1}
+
+        style={{border:"1px solid white"}}
         
       >
         <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
+
+                   {/* 🔹 Aquí va la cuadrícula */}
+          {mostrarCuadricula && <CuadriculaMapa bounds={bounds} paso={10} visible={mostrarCuadricula} />}
         <EscalarIconos
           locaciones={locacionesDelMundo}
           posiciones={posiciones}
