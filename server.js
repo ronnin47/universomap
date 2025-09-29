@@ -276,6 +276,7 @@ app.put("/actualizarMundo/:id", async (req, res) => {
     coords_y,
     capa,
     imagenPre,
+    mundo,
   } = req.body;
 
   try {
@@ -291,8 +292,10 @@ app.put("/actualizarMundo/:id", async (req, res) => {
         coords_x = $7,
         coords_y = $8,
         capa = $9,
-        "imagenPre"=$10
-      WHERE id = $11
+        "imagenPre"=$10,
+        mundo=$11
+
+      WHERE id = $12
       RETURNING *;
     `;
 
@@ -307,6 +310,7 @@ app.put("/actualizarMundo/:id", async (req, res) => {
       coords_y,
       capa,
       imagenPre,
+      mundo,
       id,
     ];
 
@@ -315,6 +319,16 @@ app.put("/actualizarMundo/:id", async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ ok: false, msg: "Mundo no encontrado" });
     }
+
+  
+
+    // Emitir a todos los clientes conectados solo si se actualizó
+    io.emit("actualizarPersonajeMapa", {
+      id: result.rows[0].id,
+      coords_x: result.rows[0].coords_x,
+      coords_y: result.rows[0].coords_y,
+      mundo: result.rows[0].mundo,
+    });
 
     res.json({ ok: true, mundo: result.rows[0] });
   } catch (error) {

@@ -313,13 +313,23 @@ const crearIcono = (loc,iconoUrl, tipo, tamano = 32) => {
   });
 };
 
-function EscalarIconos({ usuario,locaciones, posiciones, setPosiciones, esNarrador, setLocaciones, abrirModal,  }) {
+function EscalarIconos({
+  usuario,
+  locaciones,
+  posiciones,
+  setPosiciones,
+  esNarrador,
+  setLocaciones,
+  abrirModal,
+}) {
   const map = useMapEvent("zoom", () => {
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker && layer.options._locacion) {
         const loc = layer.options._locacion;
-        const nuevoTamano = loc.tamano * map.getZoom();
-        layer.setIcon(crearIcono(loc,loc.iconoUrl, loc.tipo, nuevoTamano));
+        // Usamos loc.tamanoBase para mantener el tamaño original
+        const zoomFactor = map.getZoom();
+        const nuevoTamano = (loc.tamanoBase || loc.tamano) * zoomFactor;
+        layer.setIcon(crearIcono(loc, loc.iconoUrl, loc.tipo, nuevoTamano));
       }
     });
   });
@@ -332,60 +342,61 @@ function EscalarIconos({ usuario,locaciones, posiciones, setPosiciones, esNarrad
       const pos = posiciones[loc.id];
       if (!pos) return null;
 
+      // Aseguramos que cada loc tenga su tamanoBase
+      if (!loc.tamanoBase) loc.tamanoBase = loc.tamano;
+
       return (
         <Marker
           key={`marker-${loc.id}`}
           position={pos}
-          icon={crearIcono(loc,loc.iconoUrl, loc.tipo, loc.tamano)}
+          icon={crearIcono(loc, loc.iconoUrl, loc.tipo, loc.tamanoBase * map.getZoom())}
           draggable={esNarrador}
+          _locacion={loc}
           eventHandlers={{
-             dragend: async (e) => {
-            if (usuario === "narrador") {
-              const { lat, lng } = e.target.getLatLng();
-              setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
-              setLocaciones(prev =>
-                prev.map(m => m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m)
-              );
-              try {
-                const response = await axios.post(
-                  `${API_URL}/actualizarCoordenadas`,
-                  { id: loc.id, coords_x: lng, coords_y: lat }
+            dragend: async (e) => {
+              if (usuario === "narrador") {
+                const { lat, lng } = e.target.getLatLng();
+                setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
+                setLocaciones((prev) =>
+                  prev.map((m) =>
+                    m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m
+                  )
                 );
-                if (!response.data.ok) console.log("Error al actualizar coordenadas:", response.data.error);
-              } catch (error) {
-                console.log("❌ Error en la actualización de coordenadas:", error.message);
-              }
-            }
-          },
 
-            
-
-            dblclick: () => {
-              if (loc.tipo !== "personaje") {
-               
-                navigate(`/mapaMundo/${loc.id}`);
+                try {
+                  await axios.post(`${API_URL}/actualizarCoordenadas`, {
+                    id: loc.id,
+                    coords_x: lng,
+                    coords_y: lat,
+                  });
+                } catch (error) {
+                  console.log("❌ Error en la actualización de coordenadas:", error.message);
+                }
               }
             },
-
+            dblclick: () => {
+              if (loc.tipo !== "personaje") navigate(`/mapaMundo/${loc.id}`);
+            },
             contextmenu: () => abrirModal({ tipo: "eliminar", locacion: loc }),
           }}
-          _locacion={loc}
         >
-<Popup closeOnClick={true} className="!p-0">
-  <div className="space-y-3 w-48 ">
-    <h2 className="text-xl font-bold text-blue-400 text-center drop-shadow-md">{loc.nombre}</h2>
-    {(loc.imagenPre || loc.imagenMapaMundi) && (
-      <img
-        src={loc.imagenPre || loc.imagenMapaMundi}
-        alt="Mapa miniatura"
-        className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
-      />
-    )}
-    <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
-  {loc.descripcion}
-</p>
-  </div>
-</Popup>
+          <Popup closeOnClick className="!p-0">
+            <div className="space-y-3 w-48">
+              <h2 className="text-xl font-bold text-blue-400 text-center drop-shadow-md">
+                {loc.nombre}
+              </h2>
+              {(loc.imagenPre || loc.imagenMapaMundi) && (
+                <img
+                  src={loc.imagenPre || loc.imagenMapaMundi}
+                  alt="Mapa miniatura"
+                  className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
+                />
+              )}
+              <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
+                {loc.descripcion}
+              </p>
+            </div>
+          </Popup>
         </Marker>
       );
     });

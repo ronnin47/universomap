@@ -269,91 +269,82 @@ const rect = L.rectangle(rectBounds, {
 }
 
  
-// 🔹 Escala los íconos según zoom y agrega clic derecho para eliminar
 function EscalarIconos({ locaciones, posiciones, setPosiciones, usuario, setLocaciones, abrirModalEliminar }) {
-  const map = useMapEvent("zoom", () => {
-    const zoom = map.getZoom();
-    const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
-
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker && layer.options._locacion) {
-        const loc = layer.options._locacion;
-        const nuevoTamano = loc.tamano * factor;
-        layer.setIcon(crearIcono(loc.iconoUrl, loc.tipo, nuevoTamano));
-      }
-    });
-  });
-
+  const [zoomFactor, setZoomFactor] = useState(1);
   const navigate = useNavigate();
 
+  // Detecta cambios de zoom y actualiza el factor
+  useMapEvent("zoom", (e) => {
+    const zoom = e.target.getZoom();
+    const factor = Math.max(1, 1 + (zoom - 1) * 0.85);
+    setZoomFactor(factor);
+  });
+
   return locaciones.map((loc) => {
-    const posicion = posiciones[loc.id] || [bounds[1][0]/2, bounds[1][1]/2];
+    const posicion = posiciones[loc.id] || [bounds[1][0] / 2, bounds[1][1] / 2];
 
     return (
       <Marker
         key={loc.id}
         position={posicion}
         draggable={
-          (usuario === "narrador") || 
-          (usuario !== "narrador" && loc.tipo === "personaje")
+          usuario === "narrador" || (usuario !== "narrador" && loc.tipo === "personaje")
         }
-        icon={crearIcono(loc.iconoUrl, loc.tipo, loc.tamano)}
+        icon={crearIcono(loc.iconoUrl, loc.tipo, loc.tamano * zoomFactor)} // <-- aquí aplica el zoom
         eventHandlers={{
           dragend: async (e) => {
-            if ((usuario === "narrador") || (usuario !== "narrador" && loc.tipo === "personaje")) {
+            if (usuario === "narrador" || (usuario !== "narrador" && loc.tipo === "personaje")) {
               const { lat, lng } = e.target.getLatLng();
               setPosiciones((prev) => ({ ...prev, [loc.id]: [lat, lng] }));
-              setLocaciones(prev =>
-                prev.map(m => m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m)
+              setLocaciones((prev) =>
+                prev.map((m) =>
+                  m.id === loc.id ? { ...m, coords_x: lng, coords_y: lat } : m
+                )
               );
 
-               // Emitimos al servidor
-                socket.emit("moverLocacion", { id: loc.id, coords_x: lng, coords_y: lat });
+              // Emitimos al servidor
+              socket.emit("moverLocacion", { id: loc.id, coords_x: lng, coords_y: lat });
 
               try {
-                const response = await axios.post(
-                  `${API_URL}/actualizarCoordenadas`,
-                  { id: loc.id, coords_x: lng, coords_y: lat }
-                );
+                const response = await axios.post(`${API_URL}/actualizarCoordenadas`, {
+                  id: loc.id,
+                  coords_x: lng,
+                  coords_y: lat,
+                });
                 if (!response.data.ok) console.log("Error al actualizar coordenadas:", response.data.error);
               } catch (error) {
                 console.log("❌ Error en la actualización de coordenadas:", error.message);
               }
             }
           },
-         
-            dblclick: () => {
-              if (loc.tipo == "personaje") {
-                navigate(`/personaje/${loc.id}`);
-                console.log("Pao por personaje antes de salir")
-              }else{
-                navigate(`/mapaMundo/${loc.id}`);
-              }
+          dblclick: () => {
+            if (loc.tipo === "personaje") {
+              navigate(`/personaje/${loc.id}`);
+            } else {
+              navigate(`/mapaMundo/${loc.id}`);
             }
-          ,
+          },
           contextmenu: () => {
             if (usuario === "narrador") abrirModalEliminar(loc);
-          }
+          },
         }}
         _locacion={loc}
       >
-       <Popup 
-       closeOnClick={true} 
-       className="!p-0">
-       <div className="space-y-3 w-48">
-       <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
-       {(loc.imagenPre || loc.imagenMapaMundi) && (
-       <img
-        src={loc.imagenPre || loc.imagenMapaMundi}
-        alt="Mapa miniatura"
-        className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
-       />
-       )}
-       <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
-          {loc.descripcion}
-       </p>
-       </div>
-       </Popup>
+        <Popup closeOnClick={true} className="!p-0">
+          <div className="space-y-3 w-48">
+            <h2 className="text-xl font-bold text-gray-200 text-center drop-shadow-md">{loc.nombre}</h2>
+            {(loc.imagenPre || loc.imagenMapaMundi) && (
+              <img
+                src={loc.imagenPre || loc.imagenMapaMundi}
+                alt="Mapa miniatura"
+                className="w-full h-24 object-cover rounded-md border border-gray-700 shadow-inner"
+              />
+            )}
+            <p className="text-gray-300 text-sm leading-snug line-clamp-4 overflow-hidden">
+              {loc.descripcion}
+            </p>
+          </div>
+        </Popup>
       </Marker>
     );
   });
@@ -377,10 +368,14 @@ const [mostrarCuadricula, setMostrarCuadricula] = useState(false);
     locaciones.filter(l => l.capa === 1 && l.mundo === mundo.id),
     [locaciones, mundo.id]
   );
-/*
+
+
+
+
+  
 console.log(`Estamos en el mapa:${mundo.nombre} 
              Su id es:${mundo.id} `)
-*/
+
   const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
 
 
@@ -412,6 +407,7 @@ useEffect(() => {
       x: mundo.coords_x || 0,
       y: mundo.coords_y || 0,
       imagenPre:mundo.imagenPre || "",
+      mundo:mundo.mundo,
     });
   }
 }, [mundo]);
@@ -506,14 +502,18 @@ useEffect(() => {
     tamano: "",
     iconoUrl: "",
     imagenPre:"",
+    mundo:"",
   });
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"", });
+    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"",mundo:"" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
+
+
+
 
   const guardarLocacionMundo = async () => {
     if (!posicionClick) return;
@@ -531,6 +531,9 @@ useEffect(() => {
       mundo: mundo.id,
       imagenPre:formData.imagenPre || imagenBase
     };
+
+
+
     try {
       const response = await axios.post(`${API_URL}/guardarLocacionMundo`, nuevaLocacion);
       if (response.data.ok) {
@@ -796,13 +799,29 @@ useEffect(() => {
             onChange={(e) => setCamposMundo({ ...camposMundo, tamano: Number(e.target.value) })}
           />
 
-          <input
-            type="number"
-            placeholder="Capa"
-            className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
-            value={camposMundo.capa ?? mundo.capa}
-            onChange={(e) => setCamposMundo({ ...camposMundo, capa: Number(e.target.value) })}
-          />
+                <select
+                  className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg"
+                  value={camposMundo.mundo ?? mundo.mundo ?? ""}
+                  onChange={(e) =>
+                    setCamposMundo({ ...camposMundo, mundo: Number(e.target.value) })
+                  }
+                >
+                  <option value="">Seleccionar mapa</option>
+                  {locaciones
+                    .filter((loc) => loc.tipo !== "personaje") // 👈 excluimos personajes
+                    .map((loc) => (
+                      <option key={loc.id} value={loc.id}>
+                        {loc.nombre}
+                      </option>
+                    ))}
+                </select>
+
+
+
+
+
+
+
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -840,6 +859,7 @@ useEffect(() => {
           coords_y: camposMundo.y || mundo.coords_y,
           capa: camposMundo.capa || mundo.capa,
           imagenPre: camposMundo.imagenPre || imagenBase,
+          mundo:camposMundo.mundo || mundo.mundo,
         }
       );
 
@@ -993,3 +1013,5 @@ usuario={usuario}
     </div>
   );
 };
+
+
