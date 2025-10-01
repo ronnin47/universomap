@@ -23,6 +23,7 @@ const iconosBase = {
   personaje: "🧑",
   mitama:"/mitamaDorada.svg",
   posada: "🛏️",
+   tatami:"https://i.redd.it/72lcjdho94pb1.png",
   brujula: "🧭",
   montaña: "⛰️",
   volcán: "🌋",
