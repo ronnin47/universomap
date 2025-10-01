@@ -507,7 +507,7 @@ useEffect(() => {
   const [posicionClick, setPosicionClick] = useState(null);
 
   const abrirModal = (latlng) => {
-    setFormData({ nombre: "", tipo: "puntero", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"",mundo:"" });
+    setFormData({ nombre: "", tipo: "personaje", descripcion: "", imagenMapaMundi: "", tamano: "", iconoUrl: "",imagenPre:"",mundo:"" });
     setPosicionClick([latlng.lat, latlng.lng]);
     setModalVisible(true);
   };
