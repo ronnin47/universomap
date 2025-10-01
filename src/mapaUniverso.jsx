@@ -377,7 +377,7 @@ function EscalarIconos({
             dblclick: () => {
               if (loc.tipo !== "personaje") navigate(`/mapaMundo/${loc.id}`);
             },
-            contextmenu: () => abrirModal({ tipo: "eliminar", locacion: loc }),
+            contextmenu: () => {if (usuario === "narrador") abrirModal({ tipo: "eliminar", locacion: loc })},
           }}
         >
           <Popup closeOnClick className="!p-0">
