@@ -36,7 +36,7 @@ export const App = () => {
     consumirLocaciones();
   }, []);
 
-  // Conexión Socket.io
+ 
   useEffect(() => {
     const socket = io(API_URL, {
       transports: ["websocket"],
