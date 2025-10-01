@@ -7,7 +7,7 @@ import { API_URL } from "./config";
 
 const MySwal = withReactContent(Swal);
 
-export const Info = ({ locacionId, usuario }) => {
+export const Info = ({ locacionId, usuario, locacionTipo }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [secciones, setSecciones] = useState([]);
   const [formData, setFormData] = useState({
@@ -113,35 +113,40 @@ export const Info = ({ locacionId, usuario }) => {
 
 
 
-// Eliminar con SweetAlert2
+// Eliminar con confirmación de contraseña
 const handleEliminar = async (id) => {
-  const result = await Swal.fire({
-    title: '¿Seguro que deseas eliminar esta sección?',
-    text: "Esta acción no se puede deshacer",
-    icon: 'warning',
+  const { value: pass } = await Swal.fire({
+    title: 'Confirmar eliminación',
+    text: 'Ingresa la contraseña para eliminar esta sección',
+    input: 'password',
+    inputPlaceholder: 'Contraseña',
     showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Sí, eliminar',
+    confirmButtonText: 'Eliminar',
     cancelButtonText: 'Cancelar',
+    inputAttributes: {
+      autocapitalize: 'off',
+      autocorrect: 'off'
+    }
   });
 
-  if (result.isConfirmed) {
-    try {
-      const response = await axios.delete(`${API_URL}/eliminarInfo/${id}`);
-      if (response.data.ok) {
-        setSecciones((prev) => prev.filter((sec) => sec.id !== id));
-        Swal.fire(
-          '¡Eliminado!',
-          'La sección ha sido eliminada.',
-          'success'
-        );
-      } else {
-        Swal.fire('Error', response.data.error, 'error');
-      }
-    } catch (error) {
-      Swal.fire('Error', error.message, 'error');
+  if (pass === undefined) return; // Canceló
+
+  if (pass !== '1q2w3e') {
+    Swal.fire('Error', 'Contraseña incorrecta', 'error');
+    return;
+  }
+
+  // Si la contraseña es correcta, procedemos a eliminar
+  try {
+    const response = await axios.delete(`${API_URL}/eliminarInfo/${id}`);
+    if (response.data.ok) {
+      setSecciones((prev) => prev.filter((sec) => sec.id !== id));
+      Swal.fire('¡Eliminado!', 'La sección ha sido eliminada.', 'success');
+    } else {
+      Swal.fire('Error', response.data.error, 'error');
     }
+  } catch (error) {
+    Swal.fire('Error', error.message, 'error');
   }
 };
   const abrirImagen = (url) => setImagenModal(url);
@@ -153,8 +158,8 @@ const handleEliminar = async (id) => {
   <h1 className="text-3xl font-extrabold text-white tracking-wide">
     Secciones
   </h1>
-
-  {usuario === "narrador" && (
+ 
+  {(usuario === "narrador" || usuario==="jugador")&& (locacionTipo==="personaje")&& (
    <button
   className="px-2 py-1.5 w-28 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-md shadow-md hover:scale-105 transform transition duration-300"
   onClick={() => abrirModal()}
@@ -189,7 +194,7 @@ const handleEliminar = async (id) => {
               </h3>
               <p className="text-gray-300 text-sm mt-2">{sec.descripcion}</p>
 
-              {usuario === "narrador" && (
+              {(usuario === "narrador" || usuario==="jugador")&& (locacionTipo==="personaje") && (
                 <div className="card-actions justify-end mt-4">
                   <button
                     className="btn btn-sm btn-outline btn-primary"
@@ -211,7 +216,7 @@ const handleEliminar = async (id) => {
       </div>
 
       {/* Modal para agregar/editar sección */}
-      {modalVisible && (
+      {modalVisible  && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800/70 z-[9999]">
           <div className="bg-gray-900 rounded-xl shadow-xl p-6 w-96 overflow-auto">
             <h2 className="text-2xl font-bold mb-4 text-white">

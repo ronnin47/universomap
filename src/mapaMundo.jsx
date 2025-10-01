@@ -662,7 +662,7 @@ useEffect(() => {
           setLocaciones={setLocaciones}
           abrirModalEliminar={abrirModalEliminar}
         />
-        {usuario === "narrador" && <RightClickMenu abrirModal={abrirModal} />}
+        {(usuario === "narrador" || usuario=== "jugador") && <RightClickMenu abrirModal={abrirModal} />}
       </MapContainer>
     </div>
 
@@ -894,13 +894,15 @@ useEffect(() => {
     <div className="bg-gray-900 rounded-xl shadow-xl p-6 w-96 overflow-auto">
       <h2 className="text-2xl font-bold mb-4 text-white">Nueva Locación</h2>
 
-      <input
-        type="text"
-        placeholder="URL de la imagen del mapa"
-        className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
-        value={formData.imagenMapaMundi}
-        onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
-      />
+     {(usuario === "narrador" || usuario !== "jugador") && (
+  <input
+    type="text"
+    placeholder="URL de la imagen del mapa"
+    className="input input-bordered w-full bg-gray-700 text-white placeholder-gray-400 border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+    value={formData.imagenMapaMundi}
+    onChange={(e) => setFormData({ ...formData, imagenMapaMundi: e.target.value })}
+  />
+)}
 
        <input
         type="text"
@@ -919,14 +921,24 @@ useEffect(() => {
       />
 
       <select
-        className="select select-bordered w-full bg-gray-700 text-white border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
-        value={formData.tipo}
-        onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
-      >
-        {Object.keys(iconosBase).map((tipo) => (
-          <option key={tipo} value={tipo}>{tipo}</option>
-        ))}
-      </select>
+  className="select select-bordered w-full bg-gray-700 text-white border-gray-600 focus:border-purple-500 focus:ring focus:ring-purple-400/30 rounded-lg mb-3"
+  value={formData.tipo}
+  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+>
+  {Object.keys(iconosBase)
+    .filter((tipo) => {
+      // Si el usuario es "jugador", solo dejamos "personaje"
+      if (usuario === "jugador") {
+        return tipo === "personaje";
+      }
+      return true; // si no es jugador, mostramos todo
+    })
+    .map((tipo) => (
+      <option key={tipo} value={tipo}>
+        {tipo}
+      </option>
+    ))}
+</select>
 
       <input
         type="text"
@@ -1006,6 +1018,7 @@ useEffect(() => {
 <Info 
 locacionId={mundo.id}
 usuario={usuario}
+locacionTipo={camposMundo.tipo}
 />
    
 

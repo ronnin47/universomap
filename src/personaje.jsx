@@ -282,7 +282,7 @@ useEffect(() => {
       
 {/* Contenedor para centrar */}
 
-{usuario==="narrador" ?(
+{(usuario==="narrador" || usuario==="jugador")  ?(
   <div className="flex justify-end mb-4 mt-6">
   {/* Botón para abrir modal */}
   <button
@@ -461,6 +461,7 @@ useEffect(() => {
 <Info 
 locacionId={mundo.id}
 usuario={usuario}
+locacionTipo={camposMundo.tipo}
 />
    
 
