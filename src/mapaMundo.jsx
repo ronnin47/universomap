@@ -25,7 +25,6 @@ const iconosBase = {
   mundo: "🌍",
   personaje: "🧑",
   posada: "🛏️",
-  tatami:"https://i.redd.it/72lcjdho94pb1.png",
   brujula: "🧭",
   montaña: "⛰️",
   volcán: "🌋",
