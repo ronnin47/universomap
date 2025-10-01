@@ -163,7 +163,7 @@ const crearIcono = (iconoUrl, tipo, tamano = 32) => {
     (icono.startsWith("http") || icono.endsWith(".svg") || icono.endsWith(".png") || icono.endsWith(".jpg"))
   ) {
     return new L.DivIcon({
-      html: `<div class="token-redondo" style="width:${tamano}px; height:${tamano}px;"><img src="${icono}" /></div>`,
+      html: `<div class="token-redondo" style="width:${tamano}px; height:${tamano}px;  background-color: black;"><img src="${icono}" /></div>`,
       className: "",
       iconSize: [tamano, tamano],
       iconAnchor: [tamano / 2, tamano / 2],
@@ -647,7 +647,7 @@ useEffect(() => {
         maxBounds={bounds}
         maxBoundsViscosity={1}
 
-        style={{border:"1px solid white"}}
+        style={{border:"1px solid white",}}
         
       >
         <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />

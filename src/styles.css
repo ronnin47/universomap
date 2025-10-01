@@ -20,21 +20,15 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: white; /* el fondo solo se ve si la imagen no cubre todo */
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .token-redondo img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Ajusta la imagen sin deformarla */
-}
-
-.token-redondo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* cubre todo el contenedor */
-  display: block;    /* evita espacio inferior por inline img */
+  object-fit: cover; /* asegura que cubra todo el contenedor */
+  display: block;    /* elimina espacio inferior por ser inline */
 }
 .token-redondo:hover {
   transform: scale(1.7);
