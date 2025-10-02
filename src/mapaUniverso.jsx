@@ -517,70 +517,69 @@ export const MapaUniverso = ({ usuario, locaciones, setLocaciones }) => {
 </button>
 
 
-      <div className="w-full h-[60vh] p-1 flex gap-5">
-        {/* 🔹 Mapa principal */}
-        <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
-          <MapContainer
-            center={[bounds[1][0] / 2, bounds[1][1] / 2]}
-            zoom={1}
-            minZoom={1}
-            maxZoom={5}
-            scrollWheelZoom
-            crs={L.CRS.Simple}
-            className="w-full h-full"
-            maxBounds={bounds}
-            maxBoundsViscosity={1}
-          >
-            <ImageOverlay 
-            url={imagenMapa} 
-            bounds={bounds}
-            />
+     <div className="w-full h-[60vh] p-1 flex flex-col lg:flex-row gap-5">
+  {/* 🔹 Mapa principal */}
+  <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
+    <MapContainer
+      center={[bounds[1][0] / 2, bounds[1][1] / 2]}
+      zoom={1}
+      minZoom={1}
+      maxZoom={5}
+      scrollWheelZoom
+      crs={L.CRS.Simple}
+      className="w-full h-[60vh] lg:h-full"
+      maxBounds={bounds}
+      maxBoundsViscosity={1}
+    >
+      <ImageOverlay url={imagenMapa} bounds={bounds} />
 
+      {/* 🔹 Cuadrícula */}
+      {mostrarCuadricula && (
+        <CuadriculaMapa
+          bounds={bounds}
+          paso={10}
+          visible={mostrarCuadricula}
+        />
+      )}
 
-           
+      <EscalarIconos
+        locaciones={locaciones}
+        posiciones={posiciones}
+        setPosiciones={setPosiciones}
+        esNarrador={esNarrador}
+        setLocaciones={setLocaciones}
+        abrirModal={abrirModal}
+        usuario={usuario}
+      />
+      {esNarrador && <RightClickMenu abrirModal={abrirModal} />}
+    </MapContainer>
+  </div>
 
-             {/* 🔹 Aquí va la cuadrícula */}
-  {mostrarCuadricula && <CuadriculaMapa bounds={bounds} paso={10} visible={mostrarCuadricula} />}
-
-            <EscalarIconos
-              locaciones={locaciones}
-              posiciones={posiciones}
-              setPosiciones={setPosiciones}
-              esNarrador={esNarrador}
-              setLocaciones={setLocaciones}
-              abrirModal={abrirModal}
-              usuario={usuario}
-            />
-            {esNarrador && <RightClickMenu abrirModal={abrirModal} />}
-          </MapContainer>
+  {/* 🔹 Panel de mini mapas */}
+  <div className="flex lg:flex-col flex-row gap-3 w-full lg:w-32 overflow-x-auto lg:overflow-y-auto p-3">
+    {locacionesCapa0
+      .filter((loc) => loc.tipo !== "personaje")
+      .map((loc) => (
+        <div
+          key={loc.id}
+          className="flex-shrink-0 cursor-pointer text-center borderHover"
+          onClick={() => {
+            if (loc.tipo !== "personaje") {
+              navigate(`/mapaMundo/${loc.id}`);
+            }
+          }}
+        >
+          <img
+            src={loc.imagenMapaMundi || imagenBase}
+            alt={loc.nombre}
+            className="w-24 h-16 object-cover rounded-lg border border-white/50"
+            style={{ border: "0.5px solid gray" }}
+          />
+          <span className="text-white text-sm block mt-1">{loc.nombre}</span>
         </div>
-
-                {/* 🔹 Panel lateral con mini mapas */}
-        <div className="flex flex-col gap-3 w-32 overflow-y-auto  p-3">
-          {locacionesCapa0
-            .filter((loc) => loc.tipo !== "personaje")
-            .map((loc) => (
-              <div
-                key={loc.id}
-                className="flex-shrink-0 cursor-pointer text-center borderHover"
-                onClick={() => {
-                  if (loc.tipo !== "personaje") {
-               
-                    navigate(`/mapaMundo/${loc.id}`);
-                  }
-                }}
-              >
-                <img
-                  src={loc.imagenMapaMundi || imagenBase}
-                  alt={loc.nombre}
-                  className="w-24 h-16 object-cover rounded-lg border border-white/50"
-                  style={{border:"0.5px solid gray"}}
-                />
-                <span className="text-white text-sm block mt-1">{loc.nombre}</span>
-              </div>
-            ))}
-        </div>
-      </div>
+      ))}
+  </div>
+</div>
 
      {/* 🔹 Modal Crear */}
 {modalData?.tipo === "crear" && (

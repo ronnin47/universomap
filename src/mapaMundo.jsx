@@ -633,64 +633,68 @@ useEffect(() => {
 
 
   {/* 🔹 Contenedor principal: mapa y mini-mapas */}
-  <div className="w-full h-[60vh] p-1 flex gap-5" >
-    {/* Mapa principal */}
-    <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl  overflow-hidden">
-      <MapContainer
-        center={[bounds[1][0] / 2, bounds[1][1] / 2]}
-        zoom={1}
-        minZoom={1}
-        maxZoom={5}
-        scrollWheelZoom
-        crs={L.CRS.Simple}
-        className="w-full h-full rounded-2xl"
-        maxBounds={bounds}
-        maxBoundsViscosity={1}
+ <div className="w-full h-[60vh] p-1 flex flex-col lg:flex-row gap-5">
+  {/* 🔹 Mapa principal */}
+  <div className="flex-1 card bg-base-200 shadow-xl rounded-2xl overflow-hidden">
+    <MapContainer
+      center={[bounds[1][0] / 2, bounds[1][1] / 2]}
+      zoom={1}
+      minZoom={1}
+      maxZoom={5}
+      scrollWheelZoom
+      crs={L.CRS.Simple}
+      className="w-full h-[60vh] lg:h-full rounded-2xl"
+      maxBounds={bounds}
+      maxBoundsViscosity={1}
+      style={{ border: "1px solid white" }}
+    >
+      <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
 
-        style={{border:"1px solid white",}}
-        
-      >
-        <ImageOverlay url={mundo.imagenMapaMundi || ""} bounds={bounds} />
+      {/* 🔹 Cuadrícula */}
+      {mostrarCuadricula && (
+        <CuadriculaMapa bounds={bounds} paso={10} visible={mostrarCuadricula} />
+      )}
 
-                   {/* 🔹 Aquí va la cuadrícula */}
-          {mostrarCuadricula && <CuadriculaMapa bounds={bounds} paso={10} visible={mostrarCuadricula} />}
-        <EscalarIconos
-          locaciones={locacionesDelMundo}
-          posiciones={posiciones}
-          setPosiciones={setPosiciones}
-          usuario={usuario}
-          setLocaciones={setLocaciones}
-          abrirModalEliminar={abrirModalEliminar}
-        />
-        {(usuario === "narrador" || usuario=== "jugador") && <RightClickMenu abrirModal={abrirModal} />}
-      </MapContainer>
-    </div>
+      <EscalarIconos
+        locaciones={locacionesDelMundo}
+        posiciones={posiciones}
+        setPosiciones={setPosiciones}
+        usuario={usuario}
+        setLocaciones={setLocaciones}
+        abrirModalEliminar={abrirModalEliminar}
+      />
 
-    {/* Panel lateral mini-mapas */}
-    <div className="flex flex-col gap-3 w-32 overflow-y-auto p-3 h-[60vh]">
-      {locacionesCapa0
-        .filter((loc) => loc.tipo !== "personaje")
-        .map((loc) => (
-          <div
-            key={loc.id}
-            className="flex-shrink-0 cursor-pointer text-center borderHover"
-            onClick={() => {
-              if (loc.tipo !== "personaje") {
-                navigate(`/mapaMundo/${loc.id}`);
-              }
-            }}
-          >
-            <img
-              src={loc.imagenMapaMundi || imagenBase}
-              alt={loc.nombre}
-              className="w-24 h-16 object-cover rounded-lg border border-white/50"
-              style={{ border: "1px solid white" }}
-            />
-            <span className="text-white text-sm block mt-1">{loc.nombre}</span>
-          </div>
-        ))}
-    </div>
+      {(usuario === "narrador" || usuario === "jugador") && (
+        <RightClickMenu abrirModal={abrirModal} />
+      )}
+    </MapContainer>
   </div>
+
+  {/* 🔹 Panel lateral / inferior con mini-mapas */}
+  <div className="flex lg:flex-col flex-row gap-3 w-full lg:w-32 overflow-x-auto lg:overflow-y-auto p-3 lg:h-[60vh]">
+    {locacionesCapa0
+      .filter((loc) => loc.tipo !== "personaje")
+      .map((loc) => (
+        <div
+          key={loc.id}
+          className="flex-shrink-0 cursor-pointer text-center borderHover"
+          onClick={() => {
+            if (loc.tipo !== "personaje") {
+              navigate(`/mapaMundo/${loc.id}`);
+            }
+          }}
+        >
+          <img
+            src={loc.imagenMapaMundi || imagenBase}
+            alt={loc.nombre}
+            className="w-24 h-16 object-cover rounded-lg border border-white/50"
+            style={{ border: "1px solid white" }}
+          />
+          <span className="text-white text-sm block mt-1">{loc.nombre}</span>
+        </div>
+      ))}
+  </div>
+</div>
 
   {/* 🔹 Descripción debajo de todo */}
   <div className="w-8/9 mt-2 p-4">
