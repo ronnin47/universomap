@@ -49,6 +49,15 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("locacionMovida", { id, coords_x, coords_y });
   });
 
+
+
+    // 🔹 Cuando alguien crea una nueva locación
+  socket.on("crearLocacion", (locGuardada) => {
+    // 🔹 Emitimos a todos los clientes excepto el que la creó
+    socket.broadcast.emit("nuevaLocacion", locGuardada);
+  });
+
+  
   socket.on("disconnect", () => {
     console.log(`Cliente desconectado: ${socket.id}`);
   });

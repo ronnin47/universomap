@@ -377,7 +377,17 @@ console.log(`Estamos en el mapa:${mundo.nombre}
              Su id es:${mundo.id} `)
 
   const imagenBase="https://res.cloudinary.com/dzul1hatw/image/upload/v1755123685/imagenBase_wcjism.jpg";
+useEffect(() => {
+  socket.on("nuevaLocacion", (locGuardada) => {
+    setLocaciones((prev) => [...prev, locGuardada]);
+    setPosiciones((prev) => ({
+      ...prev,
+      [locGuardada.id]: [locGuardada.coords_y, locGuardada.coords_x],
+    }));
+  });
 
+  return () => socket.off("nuevaLocacion");
+}, []);
 
  useEffect(() => {
   const agregarAlHistorial = () => {
@@ -541,6 +551,9 @@ useEffect(() => {
         setLocaciones(prev => [...prev, locGuardada]);
         setPosiciones(prev => ({ ...prev, [locGuardada.id]: [locGuardada.coords_y, locGuardada.coords_x] }));
         setModalVisible(false);
+
+         // 🔹 Notificamos a todos los clientes conectados
+    socket.emit("crearLocacion", locGuardada);
       } else console.log("Error al guardar locación:", response.data.error);
     } catch (error) {
       console.log("❌ Error en el POST:", error.message);
